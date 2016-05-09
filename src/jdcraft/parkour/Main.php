@@ -161,8 +161,6 @@ class Main extends PluginBase implements Listener {
                         "maker" => $player->getName()
                     );
 
-                    $mu = "$";
-
                     //Check if there's a FINISH Sign
 
                     foreach (array_keys($this->parkour) as $e) {
@@ -568,7 +566,7 @@ class Main extends PluginBase implements Listener {
         $t = array(//suffixes
             'd' => 86400,
             'h' => 3600,
-            'm' => 60,
+            'm' => 60
         );
         $s = abs($s - $start);
         $stringtemp = "";
