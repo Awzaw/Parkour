@@ -44,7 +44,6 @@ class Main extends PluginBase implements Listener {
      */
     private $parkour;
     private $sessions;
-    private $signchanging;
     private $lang, $tag;
 
     public function onEnable() {
@@ -54,7 +53,6 @@ class Main extends PluginBase implements Listener {
 
         $this->parkour = array();
         $this->sessions = [];
-        $this->signchanging = false;
 
         $this->saveResource("language.properties");
         $this->saveResource("parkour.yml");
@@ -106,7 +104,6 @@ class Main extends PluginBase implements Listener {
                         $id = $idamount[0]; //$id could be string or int still...
 
 
-                        
 // Check if the string reward is a valid block... not working?
 
                     if (!is_numeric($id)) {// if ID is a string
@@ -146,18 +143,11 @@ class Main extends PluginBase implements Listener {
 
                     foreach (array_keys($this->parkour) as $d) {
 
-                        //echo("Checking the parkours before making a start sign\n");
-                        var_dump($d);
-                        //echo($this->parkour[$d]["type"] . "\n");
-                        //echo("Is " . $this->parkour[$d]["name"] . " === " . $parkourname . "\n");
-
                         if ($this->parkour[$d]["type"] === 0 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("start-exists") . " " . $parkourname);
                             return;
                         }
                     }
-
-                    //echo("Got here, now make the parkour " . $event->getLine(2) . "\n");
 
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = array(
                         "type" => 0,
@@ -187,12 +177,12 @@ class Main extends PluginBase implements Listener {
 
 
                     //Write the START SIGN
-                    //$this->signchanging = true;//doubt this does anything... maybe just a PM timings glitch?
+ 
                     $event->setLine(0, TextFormat::GREEN . $data[0]);
                     $event->setLine(1, TextFormat::WHITE . $data[1]);
                     $event->setLine(2, TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]));
                     $event->setLine(3, TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3]));
-                    //$this->signchanging = false;
+
 
                     $this->saveParkours();
 
@@ -236,12 +226,10 @@ class Main extends PluginBase implements Listener {
                         "type" => 1
                     );
 
-                    //$this->signchanging = true;
                     $event->setLine(0, TextFormat::RED . $data[0]);
                     $event->setLine(1, TextFormat::WHITE . $data[1]);
                     $event->setLine(2, TextFormat::GOLD . str_replace("%1", $event->getLine(2), $data[2]));
                     $event->setLine(3, TextFormat::AQUA . str_replace("%1", $event->getLine(3), $data[3]));
-                    //$this->signchanging = false;
 
                     $this->saveParkours();
             }
@@ -403,7 +391,6 @@ class Main extends PluginBase implements Listener {
             $parkourtype = $parkour["type"];
 
             //Delete this parkour marker 
-            //MESSY PERMISSIONS CHECKING... someone else could do this so much better!
             //
             //LOOP THROUGH ALL PARKOURS
             foreach ($this->parkour as $subKey => $subArray) {
@@ -458,7 +445,6 @@ class Main extends PluginBase implements Listener {
                         }
                     }
 
-                    //echo("DELETING START PARKOUR\n");
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
                 }
@@ -522,12 +508,11 @@ class Main extends PluginBase implements Listener {
 
         $parkourname = $this->sessions[$event->getPlayer()->getName()]["parkour"];
         unset($this->sessions[$event->getPlayer()->getName()]);
-        //echo ("PK:" . $parkourname) . "\n";
 
         $pks = $this->search($this->parkour, 'name', $parkourname);
         //get the x y z and level of the Start Sign
         foreach ($pks as $p) {
-            //var_dump($p);
+
             if ($p["type"] === 0) {
                 $x = $p["x"];
                 $y = $p["y"];
