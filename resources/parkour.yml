@@ -1,0 +1,27 @@
+## configure tags for parkour
+
+start:
+ parkour:
+  - "PARKOUR"
+  - "start"
+  - "%2" # finish
+  - "%1" # reward ID:Quantity
+
+ pk:
+  - "PARKOUR"
+  - "start"
+  - "%2" # finish
+  - "%1" # reward ID:Quantity
+
+finish:
+ parkour:
+  - "PARKOUR"
+  - "finish" # type
+  - "%1" # parkour name
+  - "%1" # message or builder
+
+ pk:
+  - "PARKOUR"
+  - "finish" # type
+  - "%1" # parkour name
+  - "%1" # message or builder
