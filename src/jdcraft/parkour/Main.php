@@ -79,7 +79,7 @@ class Main extends PluginBase implements Listener {
                 $player->sendMessage($this->getMessage("no-permission-create"));
                 return;
             }
-            
+
             //attempted debounce, timings fix... doesn't stop sign change glitches
 //            if ($this->signchanging)
 //                return;
@@ -103,7 +103,8 @@ class Main extends PluginBase implements Listener {
                         $amount = $idamount[1]; //$amount could still be string...
 
 
-                    //If no reward given, set to 57
+                        
+//If no reward given, set to 57
                     if (empty($idamount[0]) || $idamount[0] === 0)
                         $id = 57; //Put these in config.yml
                     else
@@ -111,8 +112,9 @@ class Main extends PluginBase implements Listener {
 
 
 
+
                         
-                    // Check if the string reward is a valid block... not working?
+// Check if the string reward is a valid block... not working?
 
                     if (!is_numeric($id)) {// if ID is a string
                         $rewardblock = Item::fromString($id);
@@ -151,7 +153,7 @@ class Main extends PluginBase implements Listener {
                     //var_dump($this->parkour);
 
                     foreach (array_keys($this->parkour) as $d) {
-                        
+
                         //echo("Checking the parkours before making a start sign\n");
                         var_dump($d);
                         //echo($this->parkour[$d]["type"] . "\n");
@@ -162,7 +164,7 @@ class Main extends PluginBase implements Listener {
                             return;
                         }
                     }
-                    
+
                     //echo("Got here, now make the parkour " . $event->getLine(2) . "\n");
 
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = array(
@@ -178,7 +180,7 @@ class Main extends PluginBase implements Listener {
                     );
                     //$mu = EconomyAPI::getInstance()->getMonetaryUnit();
                     $mu = "$";
-                    
+
                     //Check if there's a FINISH Sign
                     foreach (array_keys($this->parkour) as $e) {
                         var_dump($e);
@@ -187,12 +189,11 @@ class Main extends PluginBase implements Listener {
                             $player->sendMessage($this->getMessage("start-created-finish"));
                             break;
                         }
-                    $player->sendMessage($this->getMessage("start-created-nofinish"));
+                        $player->sendMessage($this->getMessage("start-created-nofinish"));
                     }
-   
+
 
                     //Write the START SIGN
-
                     //$this->signchanging = true;//doubt this does anything... maybe just a PM timings glitch?
                     $event->setLine(0, TextFormat::GREEN . str_replace("%MONETARY_UNIT%", $mu, $data[0]));
                     $event->setLine(1, TextFormat::WHITE . str_replace("%MONETARY_UNIT%", $mu, $data[1]));
@@ -228,8 +229,8 @@ class Main extends PluginBase implements Listener {
                             return;
                         }
                     }
-                    
-                   
+
+
                     //Message  depends if there is a start sign
 
                     foreach (array_keys($this->parkour) as $d) {
@@ -259,7 +260,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onInteract(PlayerInteractEvent $event) {
-        
+
         if ($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -267,7 +268,7 @@ class Main extends PluginBase implements Listener {
         $block = $event->getBlock();
         if (!($block->getID() == 63 or $block->getID() == 68 or $block->getID() == 323))
             return;
-        
+
         $sender = $event->getPlayer();
 
 
@@ -301,12 +302,11 @@ class Main extends PluginBase implements Listener {
 
                 if ($parkourname == $this->sessions[$sender->getName()]["parkour"]) {
                     // CONGRATULATIONS!! a session exists and it's the same name as the finish pk sign you clicked
-
                     //Get the time elapsed
                     $endtime = time();
                     $starttime = $this->sessions[$sender->getName()]["start"];
                     $timespent = $this->timeSpent($starttime, $endtime);
-                    
+
                     //Get the reward from the Corresponding Start Sign
                     foreach (array_keys($this->parkour) as $p) {
 
@@ -340,7 +340,7 @@ class Main extends PluginBase implements Listener {
                         $item = Item::fromString($id);
 
                         if ($item instanceof ItemBlock) {
-                        $id = $item->getId();
+                            $id = $item->getId();
                         }
                     }
 
@@ -396,8 +396,6 @@ class Main extends PluginBase implements Listener {
                     }
 
                     $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
-
- 
                 } else {
                     $sender->sendMessage($this->getMessage("already-playing") . " " . $this->sessions[$sender->getName()]["parkour"]);
                 }
@@ -445,10 +443,10 @@ class Main extends PluginBase implements Listener {
                     }
 
                     //set to null first - unset() seems to be delayed sometimes?
-                    
+
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
-                   
+
                     $this->parkour[$subKey]["top"] = null;
                     unset($this->parkour[$subKey]["top"]); // And clear top scores when the FINISH sign is broken
                 }
@@ -475,16 +473,16 @@ class Main extends PluginBase implements Listener {
                     }
 
                     //echo("DELETING START PARKOUR\n");
-$this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
+                    $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
                 }
             }
 //Delete all sessions for players in this parkour
 
-            foreach ($this->sessions as $key=>$sessionarray) {
+            foreach ($this->sessions as $key => $sessionarray) {
                 if ($sessionarray["parkour"] === $parkourname)
                     $this->sessions[$key] = null;
-                    unset($this->sessions[$key]);
+                unset($this->sessions[$key]);
             }
 
 
