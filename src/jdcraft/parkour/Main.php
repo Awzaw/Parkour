@@ -80,10 +80,6 @@ class Main extends PluginBase implements Listener {
                 return;
             }
 
-            //attempted debounce, timings fix... doesn't stop sign change glitches
-//            if ($this->signchanging)
-//                return;
-
             $block = $event->getBlock();
             $parkourname = $event->getLine(2);
 
@@ -95,7 +91,6 @@ class Main extends PluginBase implements Listener {
                     $idstring = "";
                     $amount = 64;
 
-                    //var_dump($idamount);
                     //If no amount given, set to 64
                     if (empty($idamount[1]) || $idamount[1] === 0)
                         $amount = 64; //Put these in config.yml
@@ -103,14 +98,12 @@ class Main extends PluginBase implements Listener {
                         $amount = $idamount[1]; //$amount could still be string...
 
 
-                        
 //If no reward given, set to 57
+                    
                     if (empty($idamount[0]) || $idamount[0] === 0)
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
-
-
 
 
                         
@@ -137,7 +130,7 @@ class Main extends PluginBase implements Listener {
                         $idstring = Item::get($id)->getName();
                     }
 
-//Check if amount is valid
+                    //Check if amount is valid
 
                     if (!is_numeric($amount)) {
                         $amount = 64; //put this in config instead
@@ -150,7 +143,6 @@ class Main extends PluginBase implements Listener {
                     }
 
                     //Check if there's already START Sign
-                    //var_dump($this->parkour);
 
                     foreach (array_keys($this->parkour) as $d) {
 
@@ -178,10 +170,11 @@ class Main extends PluginBase implements Listener {
                         "top" => array(),
                         "maker" => $player->getName()
                     );
-                    //$mu = EconomyAPI::getInstance()->getMonetaryUnit();
+
                     $mu = "$";
 
                     //Check if there's a FINISH Sign
+
                     foreach (array_keys($this->parkour) as $e) {
                         var_dump($e);
 
@@ -195,15 +188,13 @@ class Main extends PluginBase implements Listener {
 
                     //Write the START SIGN
                     //$this->signchanging = true;//doubt this does anything... maybe just a PM timings glitch?
-                    $event->setLine(0, TextFormat::GREEN . str_replace("%MONETARY_UNIT%", $mu, $data[0]));
-                    $event->setLine(1, TextFormat::WHITE . str_replace("%MONETARY_UNIT%", $mu, $data[1]));
+                    $event->setLine(0, TextFormat::GREEN . $data[0]);
+                    $event->setLine(1, TextFormat::WHITE . $data[1]);
                     $event->setLine(2, TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]));
                     $event->setLine(3, TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3]));
                     //$this->signchanging = false;
 
                     $this->saveParkours();
-                    //echo("saved");
-
 
                     return;
 
@@ -222,14 +213,12 @@ class Main extends PluginBase implements Listener {
                     //Check if there's already a FINISH Sign
 
                     foreach (array_keys($this->parkour) as $d) {
-                        //var_dump($d);
 
                         if ($this->parkour[$d]["type"] === 1 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("finish-exists") . " " . $parkourname);
                             return;
                         }
                     }
-
 
                     //Message  depends if there is a start sign
 
@@ -272,7 +261,7 @@ class Main extends PluginBase implements Listener {
         $sender = $event->getPlayer();
 
 
-//If it's a parkour block that was clicked
+        //If it's a parkour block that was clicked
         if (isset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()])) {
             $parkour = $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()];
 
@@ -301,6 +290,7 @@ class Main extends PluginBase implements Listener {
                 }
 
                 if ($parkourname == $this->sessions[$sender->getName()]["parkour"]) {
+
                     // CONGRATULATIONS!! a session exists and it's the same name as the finish pk sign you clicked
                     //Get the time elapsed
                     $endtime = time();
@@ -334,7 +324,6 @@ class Main extends PluginBase implements Listener {
                         $amount = $idamount[1];
                     }
 
-                    //var_dump($idamount);
                     // Convert string rewards to ID
                     if (!is_numeric($id)) {
                         $item = Item::fromString($id);
@@ -343,8 +332,6 @@ class Main extends PluginBase implements Listener {
                             $id = $item->getId();
                         }
                     }
-
-                    //echo ("Giving ID " . $id . ", Amount " . $amount . "\n");
 
                     $sender->getInventory()->addItem(new Item($id, 0, $amount));
                     $sender->sendMessage($this->getMessage("parkour-completed") . " " . $parkourname . " for " . $reward . " in " . $timespent);
@@ -361,9 +348,8 @@ class Main extends PluginBase implements Listener {
                 }
             } else {
 
-//User Clicked a Start Sign
-//
-//If there's no end sign for the start.. message and return
+                //User Clicked a Start Sign
+                //If there's no end sign for the start.. message and return
 
                 $parkourname = $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]["name"];
 
@@ -477,7 +463,8 @@ class Main extends PluginBase implements Listener {
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
                 }
             }
-//Delete all sessions for players in this parkour
+
+            //Delete all sessions for players in this parkour
 
             foreach ($this->sessions as $key => $sessionarray) {
                 if ($sessionarray["parkour"] === $parkourname)
@@ -554,41 +541,6 @@ class Main extends PluginBase implements Listener {
         $event->getPlayer()->sendMessage($this->getMessage("start-again"));
     }
 
-//    public function onPlayerDeath(PlayerDeathEvent $event) {
-//
-//        //TP back to Start
-//
-//        if (!isset($this->sessions[$event->getPlayer()->getName()])) return;
-//
-//        $parkourname = $this->sessions[$event->getPlayer()->getName()];
-//
-//        //echo ("PK:" . $parkourname) . "\n";
-//
-//        $pks = $this->search($this->parkour, 'name', $parkourname);
-//        //get the x y z and level of the Start Sign
-//        foreach ($pks as $p){
-//            var_dump($p);
-//        if ($p["type"] === 0){
-//        $x = $p["x"];
-//        $y = $p["y"];
-//        $z = $p["z"];
-//        $level = $p["level"]; 
-//        }
-//        }
-//  
-//        $pos = new Vector3($x, $y, $z);
-//        $world = $this->getServer()->getLevelByName($level);
-//
-//        unset($this->sessions[$event->getPlayer()->getName()]); // so teleport works...
-//
-//        $event->getPlayer()->teleport($world->getSafeSpawn($pos));
-//        
-//        //Could also be
-//        //$event->getPlayer()->teleport(new Position($x, $y, $z, $this->getServer()->getLevelByName($level)));
-//
-//        //$this->sessions[$event->getPlayer()->getName()] = $parkourname; // set the session again
-//        
-//    }
     //TOOLS
 
     public function checkTag($firstLine, $secondLine) {
@@ -610,16 +562,6 @@ class Main extends PluginBase implements Listener {
             return "Language with key \"$key\" does not exist";
         }
     }
-
-//    //Not used for now, same as inline code
-//    public function removeElementWithValue($array, $key, $name, $key2, $type) {
-//        foreach ($array as $subKey => $subArray) {
-//            if ($subArray[$key] == $name && $subArray[$key2] == $type) {
-//                unset($array[$subKey]);
-//            }
-//        }
-//        return $array;
-//    }
 
     function search($array, $key, $value) {
         $results = array();
