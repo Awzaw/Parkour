@@ -45,6 +45,7 @@ class Main extends PluginBase implements Listener {
     private $parkour;
     private $sessions;
     private $lang, $tag;
+    private $signchanging;
 
     public function onEnable() {
         if (!file_exists($this->getDataFolder())) {
@@ -53,6 +54,7 @@ class Main extends PluginBase implements Listener {
 
         $this->parkour = array();
         $this->sessions = [];
+        $this->signchanging = false;
 
         $this->saveResource("language.properties");
         $this->saveResource("parkour.yml");
@@ -72,11 +74,17 @@ class Main extends PluginBase implements Listener {
     public function onSignChange(SignChangeEvent $event) {
 
         if (($data = $this->checkTag($event->getLine(0), $event->getLine(1))) !== false) {
+            
             $player = $event->getPlayer();
             if (!$player->hasPermission("parkour.create")) {
                 $player->sendMessage($this->getMessage("no-permission-create"));
                 return;
             }
+            
+            if ($this->signchanging) return;
+            $this->signchanging = true;
+            
+            print_r($event);
 
             $block = $event->getBlock();
             $parkourname = $event->getLine(2);
@@ -111,7 +119,7 @@ class Main extends PluginBase implements Listener {
                         if (!$rewardblock instanceof ItemBlock) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
                             $event->setCancelled(true);
-                            return;
+                            break;
                         }
                         $idstring = $id;
                         $id = $rewardblock->getId();
@@ -122,7 +130,7 @@ class Main extends PluginBase implements Listener {
 
                         if (!$rewardblock instanceof ItemBlock) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
-                            return;
+                            break;
                         }
                         $idstring = Item::get($id)->getName();
                     }
@@ -136,7 +144,7 @@ class Main extends PluginBase implements Listener {
                     //Check Target Parkout is valid
                     if (trim($event->getLine(2)) === "") {
                         $player->sendMessage($this->getMessage("no-target-parkour"));
-                        return;
+                        break;
                     }
 
                     //Check if there's already START Sign
@@ -145,7 +153,7 @@ class Main extends PluginBase implements Listener {
 
                         if ($this->parkour[$d]["type"] === 0 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("start-exists") . " " . $parkourname);
-                            return;
+                            break 2;
                         }
                     }
 
@@ -164,11 +172,10 @@ class Main extends PluginBase implements Listener {
                     //Check if there's a FINISH Sign
 
                     foreach (array_keys($this->parkour) as $e) {
-                        var_dump($e);
 
                         if ($this->parkour[$e]["type"] === 1 && ($this->parkour[$e]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("start-created-finish"));
-                            break;
+                            break 2;
                         }
                         $player->sendMessage($this->getMessage("start-created-nofinish"));
                     }
@@ -184,18 +191,18 @@ class Main extends PluginBase implements Listener {
 
                     $this->saveParkours();
 
-                    return;
+                    break;
 
 
                 case ("finish"):
 
                     if (trim($parkourname) === "") {
                         $player->sendMessage($this->getMessage("no-parkour-name"));
-                        return;
+                        break;
                     }
                     if (strpos($parkourname, ":")) {
                         $player->sendMessage($this->getMessage("invalid-parkour-name"));
-                        return;
+                        break;
                     }
 
                     //Check if there's already a FINISH Sign
@@ -204,7 +211,7 @@ class Main extends PluginBase implements Listener {
 
                         if ($this->parkour[$d]["type"] === 1 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("finish-exists") . " " . $parkourname);
-                            return;
+                            break 2;
                         }
                     }
 
@@ -213,7 +220,7 @@ class Main extends PluginBase implements Listener {
                     foreach (array_keys($this->parkour) as $d) {
                         if ($this->parkour[$d]["type"] === 0 && $this->parkour[$d]["name"] === $parkourname) {
                             $player->sendMessage($this->getMessage("start-exists"));
-                            break;
+                            break 2;
                         }
                         $player->sendMessage($this->getMessage("no-start"));
                     }
@@ -231,6 +238,7 @@ class Main extends PluginBase implements Listener {
 
                     $this->saveParkours();
             }
+            $this->signchanging = false;
         }
     }
 
