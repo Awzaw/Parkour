@@ -31,6 +31,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
+use pocketmine\math\Vector3;
 use pocketmine\utils\Config;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
 use pocketmine\event\player\PlayerJoinEvent;
@@ -45,7 +46,6 @@ class Main extends PluginBase implements Listener {
     private $parkour;
     private $sessions;
     private $lang, $tag;
-    private $signchanging;
 
     public function onEnable() {
         if (!file_exists($this->getDataFolder())) {
@@ -54,7 +54,6 @@ class Main extends PluginBase implements Listener {
 
         $this->parkour = array();
         $this->sessions = [];
-        $this->signchanging = false;
 
         $this->saveResource("language.properties");
         $this->saveResource("parkour.yml");
@@ -71,15 +70,8 @@ class Main extends PluginBase implements Listener {
         $this->saveParkours();
     }
 
-    /**
-     * @param SignChangeEvent $event
-     * @priority MONITOR
-     *
-     */
     public function onSignChange(SignChangeEvent $event) {
 
-
-        echo ("SignChange\n");
         if (($data = $this->checkTag($event->getLine(0), $event->getLine(1))) !== false) {
 
             $player = $event->getPlayer();
@@ -88,9 +80,6 @@ class Main extends PluginBase implements Listener {
                 return;
             }
 
-            if ($this->signchanging)
-                return;
-            $this->signchanging = true;
 
             $block = $event->getBlock();
             $parkourname = $event->getLine(2);
@@ -109,15 +98,13 @@ class Main extends PluginBase implements Listener {
                     else
                         $amount = $idamount[1]; //$amount could still be string...
 
-
-                        
+       
 //If no reward given, set to 57
 
                     if (empty($idamount[0]) || $idamount[0] === 0)
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
-
 
                         
 // Check if the string reward is a valid block... not working?
@@ -194,11 +181,29 @@ class Main extends PluginBase implements Listener {
                     $this->saveParkours();
 
                     //Write the START SIGN
+                    $signtext = array(
+                        TextFormat::GREEN . $data[0],
+                        TextFormat::WHITE . $data[1],
+                        TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]),
+                        TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3])
+                    );
 
-                    $event->setLine(0, TextFormat::GREEN . $data[0]);
-                    $event->setLine(1, TextFormat::WHITE . $data[1]);
-                    $event->setLine(2, TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]));
-                    $event->setLine(3, TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3]));
+//                    $task = new SignTask($this, $event, $signtext);
+//                    $this->getServer()->getScheduler()->scheduleDelayedTask($task, 60);
+                    //$block->setText($signtext[0], $signtext[1], $signtext[2], $signtext[3]);
+
+                    
+                    $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
+                    $tile = $block->getLevel()->getTile($v);
+
+                        $task = new SignTask($this, $tile, $signtext);
+                        $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
+
+//MOVED into task to delay it so that sign update works...
+//                    $event->setLine(0, TextFormat::GREEN . $data[0]);
+//                    $event->setLine(1, TextFormat::WHITE . $data[1]);
+//                    $event->setLine(2, TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]));
+//                    $event->setLine(3, TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3]));
 
                     break;
 
@@ -243,22 +248,28 @@ class Main extends PluginBase implements Listener {
                     );
 
                     $this->saveParkours();
+
+                    $signtext = array (
+                    TextFormat::RED . $data[0],
+                    TextFormat::WHITE . $data[1],
+                    TextFormat::GOLD . str_replace("%1", $event->getLine(2), $data[2]),
+                    TextFormat::AQUA . str_replace("%1", $event->getLine(3), $data[3])
+                            );
                     
-                    $event->setLine(0, TextFormat::RED . $data[0]);
-                    $event->setLine(1, TextFormat::WHITE . $data[1]);
-                    $event->setLine(2, TextFormat::GOLD . str_replace("%1", $event->getLine(2), $data[2]));
-                    $event->setLine(3, TextFormat::AQUA . str_replace("%1", $event->getLine(3), $data[3]));
+                    $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
+                    $tile = $block->getLevel()->getTile($v);
+
+                    $task = new SignTask($this, $tile, $signtext);
+                    $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
 
 
                     break;
             }
-            $this->signchanging = false;
+ 
         }
     }
 
     public function onInteract(PlayerInteractEvent $event) {
-
-        echo("INTERACTION\n");
 
         if ($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
             return;
