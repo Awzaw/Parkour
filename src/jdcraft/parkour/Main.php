@@ -196,6 +196,15 @@ class Main extends PluginBase implements Listener {
                     $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
                     $tile = $block->getLevel()->getTile($v);
 
+
+//                    $task = new SignTask($this, $event, $signtext);
+//                    $this->getServer()->getScheduler()->scheduleDelayedTask($task, 60);
+                    //$block->setText($signtext[0], $signtext[1], $signtext[2], $signtext[3]);
+
+                    
+                    $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
+                    $tile = $block->getLevel()->getTile($v);
+
                         $task = new SignTask($this, $tile, $signtext);
                         $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
 

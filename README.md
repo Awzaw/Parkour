@@ -25,6 +25,4 @@ parkour.create - players can build parkour and only destroy their own
 
 Both Start and Finish signs can be broken and remade - they will be automatically linked to an existing Start/Finish sign of the same name. When either sign is destroyed the Top Score is also reset.
 
-Cheating should be disabled...
-
-Any problems, please let me know in the discussion thread, not the reviews.
+Any cheating that involves changing gamemode or teleporting should be disabled
