@@ -11,3 +11,7 @@ permissions:
   children:
    parkour.create:
     description: Allows player to make and break their own parkours
+
+commands:
+ pk:
+  description: Parkour Commands
