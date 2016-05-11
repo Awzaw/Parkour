@@ -19,6 +19,8 @@ The #reward line at the end of the start sign can be Wood:5 or 17:5 or just Wood
 
 The last line of the Finish sign is optional, and can be used to say who made the parkour (also displayed when players start a parkour), or a comment.
 
+If not already playing parkour, clicking a Parkour Finish sign teleports the player to the parkour start sign.
+
 Permissions (all default to OP)
 parkour - players can build and destroy any parkour
 parkour.create - players can build parkour and only destroy their own
