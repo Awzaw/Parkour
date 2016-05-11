@@ -31,6 +31,7 @@ use pocketmine\plugin\PluginBase;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerRespawnEvent;
 use pocketmine\Player;
+use pocketmine\math\Vector3;
 use pocketmine\utils\Config;
 use pocketmine\event\player\PlayerGameModeChangeEvent;
 use pocketmine\event\player\PlayerJoinEvent;
@@ -44,7 +45,6 @@ class Main extends PluginBase implements Listener {
      */
     private $parkour;
     private $sessions;
-    private $signchanging;
     private $lang, $tag;
 
     public function onEnable() {
@@ -54,7 +54,6 @@ class Main extends PluginBase implements Listener {
 
         $this->parkour = array();
         $this->sessions = [];
-        $this->signchanging = false;
 
         $this->saveResource("language.properties");
         $this->saveResource("parkour.yml");
@@ -74,15 +73,13 @@ class Main extends PluginBase implements Listener {
     public function onSignChange(SignChangeEvent $event) {
 
         if (($data = $this->checkTag($event->getLine(0), $event->getLine(1))) !== false) {
+
             $player = $event->getPlayer();
             if (!$player->hasPermission("parkour.create")) {
                 $player->sendMessage($this->getMessage("no-permission-create"));
                 return;
             }
-            
-            //attempted debounce, timings fix... doesn't stop sign change glitches
-//            if ($this->signchanging)
-//                return;
+
 
             $block = $event->getBlock();
             $parkourname = $event->getLine(2);
@@ -95,31 +92,29 @@ class Main extends PluginBase implements Listener {
                     $idstring = "";
                     $amount = 64;
 
-                    //var_dump($idamount);
                     //If no amount given, set to 64
                     if (empty($idamount[1]) || $idamount[1] === 0)
                         $amount = 64; //Put these in config.yml
                     else
                         $amount = $idamount[1]; //$amount could still be string...
 
+       
+//If no reward given, set to 57
 
-                    //If no reward given, set to 57
                     if (empty($idamount[0]) || $idamount[0] === 0)
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
 
-
-
                         
-                    // Check if the string reward is a valid block... not working?
+// Check if the string reward is a valid block... not working?
 
                     if (!is_numeric($id)) {// if ID is a string
                         $rewardblock = Item::fromString($id);
                         if (!$rewardblock instanceof ItemBlock) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
-                            $event->setCancelled(true);
-                            return;
+
+                            break;
                         }
                         $idstring = $id;
                         $id = $rewardblock->getId();
@@ -130,12 +125,12 @@ class Main extends PluginBase implements Listener {
 
                         if (!$rewardblock instanceof ItemBlock) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
-                            return;
+                            break;
                         }
                         $idstring = Item::get($id)->getName();
                     }
 
-//Check if amount is valid
+                    //Check if amount is valid
 
                     if (!is_numeric($amount)) {
                         $amount = 64; //put this in config instead
@@ -144,26 +139,31 @@ class Main extends PluginBase implements Listener {
                     //Check Target Parkout is valid
                     if (trim($event->getLine(2)) === "") {
                         $player->sendMessage($this->getMessage("no-target-parkour"));
-                        return;
+                        break;
                     }
 
-                    //Check if there's already START Sign
-                    //var_dump($this->parkour);
+                    //Check if there's already START Sign and stop if there is
 
                     foreach (array_keys($this->parkour) as $d) {
-                        
-                        //echo("Checking the parkours before making a start sign\n");
-                        var_dump($d);
-                        //echo($this->parkour[$d]["type"] . "\n");
-                        //echo("Is " . $this->parkour[$d]["name"] . " === " . $parkourname . "\n");
 
                         if ($this->parkour[$d]["type"] === 0 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("start-exists") . " " . $parkourname);
-                            return;
+                            break 2;
                         }
                     }
-                    
-                    //echo("Got here, now make the parkour " . $event->getLine(2) . "\n");
+
+                    //Check if there's a FINISH Sign for the message
+                    $finishfound = false;
+                    foreach (array_keys($this->parkour) as $e) {
+
+                        if ($this->parkour[$e]["type"] === 1 && ($this->parkour[$e]["name"] === $parkourname)) {
+                            $player->sendMessage($this->getMessage("start-created-finish"));
+                            $finishfound = true;
+                            break;
+                        }
+                    }
+                    if (!$finishfound)
+                        $player->sendMessage($this->getMessage("start-created-nofinish"));
 
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = array(
                         "type" => 0,
@@ -176,90 +176,97 @@ class Main extends PluginBase implements Listener {
                         "top" => array(),
                         "maker" => $player->getName()
                     );
-                    //$mu = EconomyAPI::getInstance()->getMonetaryUnit();
-                    $mu = "$";
-                    
-                    //Check if there's a FINISH Sign
-                    foreach (array_keys($this->parkour) as $e) {
-                        var_dump($e);
 
-                        if ($this->parkour[$e]["type"] === 1 && ($this->parkour[$e]["name"] === $parkourname)) {
-                            $player->sendMessage($this->getMessage("start-created-finish"));
-                            break;
-                        }
-                    $player->sendMessage($this->getMessage("start-created-nofinish"));
-                    }
-   
-
-                    //Write the START SIGN
-
-                    //$this->signchanging = true;//doubt this does anything... maybe just a PM timings glitch?
-                    $event->setLine(0, TextFormat::GREEN . str_replace("%MONETARY_UNIT%", $mu, $data[0]));
-                    $event->setLine(1, TextFormat::WHITE . str_replace("%MONETARY_UNIT%", $mu, $data[1]));
-                    $event->setLine(2, TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]));
-                    $event->setLine(3, TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3]));
-                    //$this->signchanging = false;
 
                     $this->saveParkours();
-                    //echo("saved");
 
+                    //Write the START SIGN
+                    $signtext = array(
+                        TextFormat::GREEN . $data[0],
+                        TextFormat::WHITE . $data[1],
+                        TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]),
+                        TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3])
+                    );
 
-                    return;
+                    
+                    $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
+                    $tile = $block->getLevel()->getTile($v);
+
+                        $task = new SignTask($this, $tile, $signtext);
+                        $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
+
+//MOVED into task to delay it so that sign update works...
+//                    $event->setLine(0, TextFormat::GREEN . $data[0]);
+//                    $event->setLine(1, TextFormat::WHITE . $data[1]);
+//                    $event->setLine(2, TextFormat::AQUA . str_replace(["%2", "%MONETARY_UNIT%"], [$event->getLine(2)], $data[2]));
+//                    $event->setLine(3, TextFormat::GOLD . str_replace(["%1"], $idstring . ' x ' . $amount, $data[3]));
+
+                    break;
 
 
                 case ("finish"):
 
                     if (trim($parkourname) === "") {
                         $player->sendMessage($this->getMessage("no-parkour-name"));
-                        return;
+                        break;
                     }
                     if (strpos($parkourname, ":")) {
                         $player->sendMessage($this->getMessage("invalid-parkour-name"));
-                        return;
+                        break;
                     }
 
                     //Check if there's already a FINISH Sign
 
                     foreach (array_keys($this->parkour) as $d) {
-                        //var_dump($d);
 
                         if ($this->parkour[$d]["type"] === 1 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("finish-exists") . " " . $parkourname);
-                            return;
+                            break 2;
                         }
                     }
-                    
-                   
-                    //Message  depends if there is a start sign
 
+                    //Message  depends if there is a start sign
+                    $startfound = false;
                     foreach (array_keys($this->parkour) as $d) {
                         if ($this->parkour[$d]["type"] === 0 && $this->parkour[$d]["name"] === $parkourname) {
                             $player->sendMessage($this->getMessage("start-exists"));
+                            $startfound = true;
                             break;
                         }
-                        $player->sendMessage($this->getMessage("no-start"));
                     }
 
+                    if (!$startfound)
+                        $player->sendMessage($this->getMessage("no-start"));
 
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = array(
                         "name" => $event->getLine(2),
                         "type" => 1
                     );
 
-                    //$this->signchanging = true;
-                    $event->setLine(0, TextFormat::RED . $data[0]);
-                    $event->setLine(1, TextFormat::WHITE . $data[1]);
-                    $event->setLine(2, TextFormat::GOLD . str_replace("%1", $event->getLine(2), $data[2]));
-                    $event->setLine(3, TextFormat::AQUA . str_replace("%1", $event->getLine(3), $data[3]));
-                    //$this->signchanging = false;
-
                     $this->saveParkours();
+
+                    $signtext = array (
+                    TextFormat::RED . $data[0],
+                    TextFormat::WHITE . $data[1],
+                    TextFormat::GOLD . str_replace("%1", $event->getLine(2), $data[2]),
+                    TextFormat::AQUA . str_replace("%1", $event->getLine(3), $data[3])
+                            );
+                    
+                    $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
+                    $tile = $block->getLevel()->getTile($v);
+
+                    $task = new SignTask($this, $tile, $signtext);
+                    $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
+
+
+                    break;
             }
+ 
         }
     }
 
     public function onInteract(PlayerInteractEvent $event) {
-        
+
         if ($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -267,11 +274,11 @@ class Main extends PluginBase implements Listener {
         $block = $event->getBlock();
         if (!($block->getID() == 63 or $block->getID() == 68 or $block->getID() == 323))
             return;
-        
+
         $sender = $event->getPlayer();
 
 
-//If it's a parkour block that was clicked
+        //If it's a parkour block that was clicked
         if (isset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()])) {
             $parkour = $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()];
 
@@ -295,18 +302,37 @@ class Main extends PluginBase implements Listener {
 
                 //a finish sign was clicked... but no session exists
                 if (!isset($this->sessions[$sender->getName()])) {
+
+                    // teleport player to START SIGN
+                    $pks = $this->search($this->parkour, 'name', $parkourname);
+                    //get the x y z and level of the Start Sign
+                    foreach ($pks as $p) {
+
+                        if ($p["type"] === 0) {
+                            $x = $p["x"];
+                            $y = $p["y"];
+                            $z = $p["z"];
+                            $level = $p["level"];
+                        }
+                    }
+
+                    $pos = new Position($x, $y, $z, $this->getServer()->getLevelByName($level));
+                    $sender->teleport($pos);
+
                     $sender->sendMessage($this->getMessage("click-start") . " " . $parkourname);
+
                     return;
                 }
 
                 if ($parkourname == $this->sessions[$sender->getName()]["parkour"]) {
-                    // CONGRATULATIONS!! a session exists and it's the same name as the finish pk sign you clicked
 
+                    // CONGRATULATIONS!! a session exists and it's the same name as the finish pk sign you clicked
+                    
                     //Get the time elapsed
                     $endtime = time();
                     $starttime = $this->sessions[$sender->getName()]["start"];
                     $timespent = $this->timeSpent($starttime, $endtime);
-                    
+
                     //Get the reward from the Corresponding Start Sign
                     foreach (array_keys($this->parkour) as $p) {
 
@@ -334,17 +360,14 @@ class Main extends PluginBase implements Listener {
                         $amount = $idamount[1];
                     }
 
-                    //var_dump($idamount);
                     // Convert string rewards to ID
                     if (!is_numeric($id)) {
                         $item = Item::fromString($id);
 
                         if ($item instanceof ItemBlock) {
-                        $id = $item->getId();
+                            $id = $item->getId();
                         }
                     }
-
-                    //echo ("Giving ID " . $id . ", Amount " . $amount . "\n");
 
                     $sender->getInventory()->addItem(new Item($id, 0, $amount));
                     $sender->sendMessage($this->getMessage("parkour-completed") . " " . $parkourname . " for " . $reward . " in " . $timespent);
@@ -361,9 +384,8 @@ class Main extends PluginBase implements Listener {
                 }
             } else {
 
-//User Clicked a Start Sign
-//
-//If there's no end sign for the start.. message and return
+                //User Clicked a Start Sign
+                //If there's no end sign for the start.. message and return
 
                 $parkourname = $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]["name"];
 
@@ -396,8 +418,6 @@ class Main extends PluginBase implements Listener {
                     }
 
                     $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
-
- 
                 } else {
                     $sender->sendMessage($this->getMessage("already-playing") . " " . $this->sessions[$sender->getName()]["parkour"]);
                 }
@@ -419,7 +439,6 @@ class Main extends PluginBase implements Listener {
             $parkourtype = $parkour["type"];
 
             //Delete this parkour marker 
-            //MESSY PERMISSIONS CHECKING... someone else could do this so much better!
             //
             //LOOP THROUGH ALL PARKOURS
             foreach ($this->parkour as $subKey => $subArray) {
@@ -445,10 +464,10 @@ class Main extends PluginBase implements Listener {
                     }
 
                     //set to null first - unset() seems to be delayed sometimes?
-                    
+
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
-                   
+
                     $this->parkour[$subKey]["top"] = null;
                     unset($this->parkour[$subKey]["top"]); // And clear top scores when the FINISH sign is broken
                 }
@@ -474,17 +493,17 @@ class Main extends PluginBase implements Listener {
                         }
                     }
 
-                    //echo("DELETING START PARKOUR\n");
-$this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
+                    $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
                 }
             }
-//Delete all sessions for players in this parkour
 
-            foreach ($this->sessions as $key=>$sessionarray) {
+            //Delete all sessions for players in this parkour
+
+            foreach ($this->sessions as $key => $sessionarray) {
                 if ($sessionarray["parkour"] === $parkourname)
                     $this->sessions[$key] = null;
-                    unset($this->sessions[$key]);
+                unset($this->sessions[$key]);
             }
 
 
@@ -537,12 +556,11 @@ $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":
 
         $parkourname = $this->sessions[$event->getPlayer()->getName()]["parkour"];
         unset($this->sessions[$event->getPlayer()->getName()]);
-        //echo ("PK:" . $parkourname) . "\n";
 
         $pks = $this->search($this->parkour, 'name', $parkourname);
         //get the x y z and level of the Start Sign
         foreach ($pks as $p) {
-            //var_dump($p);
+
             if ($p["type"] === 0) {
                 $x = $p["x"];
                 $y = $p["y"];
@@ -556,41 +574,6 @@ $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":
         $event->getPlayer()->sendMessage($this->getMessage("start-again"));
     }
 
-//    public function onPlayerDeath(PlayerDeathEvent $event) {
-//
-//        //TP back to Start
-//
-//        if (!isset($this->sessions[$event->getPlayer()->getName()])) return;
-//
-//        $parkourname = $this->sessions[$event->getPlayer()->getName()];
-//
-//        //echo ("PK:" . $parkourname) . "\n";
-//
-//        $pks = $this->search($this->parkour, 'name', $parkourname);
-//        //get the x y z and level of the Start Sign
-//        foreach ($pks as $p){
-//            var_dump($p);
-//        if ($p["type"] === 0){
-//        $x = $p["x"];
-//        $y = $p["y"];
-//        $z = $p["z"];
-//        $level = $p["level"]; 
-//        }
-//        }
-//  
-//        $pos = new Vector3($x, $y, $z);
-//        $world = $this->getServer()->getLevelByName($level);
-//
-//        unset($this->sessions[$event->getPlayer()->getName()]); // so teleport works...
-//
-//        $event->getPlayer()->teleport($world->getSafeSpawn($pos));
-//        
-//        //Could also be
-//        //$event->getPlayer()->teleport(new Position($x, $y, $z, $this->getServer()->getLevelByName($level)));
-//
-//        //$this->sessions[$event->getPlayer()->getName()] = $parkourname; // set the session again
-//        
-//    }
     //TOOLS
 
     public function checkTag($firstLine, $secondLine) {
@@ -613,16 +596,6 @@ $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":
         }
     }
 
-//    //Not used for now, same as inline code
-//    public function removeElementWithValue($array, $key, $name, $key2, $type) {
-//        foreach ($array as $subKey => $subArray) {
-//            if ($subArray[$key] == $name && $subArray[$key2] == $type) {
-//                unset($array[$subKey]);
-//            }
-//        }
-//        return $array;
-//    }
-
     function search($array, $key, $value) {
         $results = array();
 
@@ -643,7 +616,7 @@ $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":
         $t = array(//suffixes
             'd' => 86400,
             'h' => 3600,
-            'm' => 60,
+            'm' => 60
         );
         $s = abs($s - $start);
         $stringtemp = "";

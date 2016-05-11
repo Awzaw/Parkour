@@ -19,12 +19,15 @@ The #reward line at the end of the start sign can be Wood:5 or 17:5 or just Wood
 
 The last line of the Finish sign is optional, and can be used to say who made the parkour (also displayed when players start a parkour), or a comment.
 
+If not already playing parkour, clicking a Parkour Finish sign teleports the player to the parkour start sign.
+
 Permissions (all default to OP)
 parkour - players can build and destroy any parkour
 parkour.create - players can build parkour and only destroy their own
 
 Both Start and Finish signs can be broken and remade - they will be automatically linked to an existing Start/Finish sign of the same name. When either sign is destroyed the Top Score is also reset.
 
-Cheating should be disabled...
-
 Any problems, please let me know in the discussion thread, not the reviews.
+
+Any cheating that involves changing gamemode or teleporting should be disabled
+
