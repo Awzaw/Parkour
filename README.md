@@ -14,12 +14,18 @@ Line2: finish
 Line3: NAME OF PARKOUR
 Line4: (Optional Comment)
 
-
-The #reward line at the end of the start sign can be Wood:5 or 17:5 or just Wood or 5 in which case it defaults to 64 items. If the reward line is blank, it will default to 64 Diamonds. If you use block names instead of ID's, please make sure you spell them correctly.
+The #reward line at the end of the start sign can be Wood:5 or 17:5 or just Wood or 5 in which case it defaults to 64 items. If the reward line is blank, it will default to 64 Diamonds. If you use block names instead of ID's, please make sure you spell them correctly, and please note that some names and ID's don't work as expected.
+To give 2 diamond swords(276), for example, you must type: Diamond Sword:2, (two words), not 276 or "DiamondSword"... for a diamond block it is "DiamondBlock", however.
 
 The last line of the Finish sign is optional, and can be used to say who made the parkour (also displayed when players start a parkour), or a comment.
-
 If not already playing parkour, clicking a Parkour Finish sign teleports the player to the parkour start sign.
+
+COMMANDS:
+/pk - displays the help for signs and commands
+/pk list - displays a list of all parkours, green names are valid parkour with a start and stop, red names are parkour start signs with no finish sign, grey names are the makers
+/pk [name of parkour] - teleports the player to the start for the parkour
+/pk go - teleports the player to a random parkour with a start and finish sign.
+
 
 Permissions (all default to OP)
 parkour - players can build and destroy any parkour
