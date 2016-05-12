@@ -80,13 +80,9 @@ class Main extends PluginBase implements Listener {
                     return true;
                 }
 
-                if (isset($param[0])) {
+                if (isset($param[0]) && (strtolower($param[0]) !== "help")) {
 
                     switch ($param[0]) {
-
-                        case 'help':
-                            $sender->sendMessage(TextFormat::GREEN . $this->getMessage("help"));
-                            break;
 
                         case "list":
 
@@ -147,17 +143,18 @@ class Main extends PluginBase implements Listener {
                         default:
 
                             $pktovisit = $param[0];
-
+                            $howmanyparkour = 0;
                             foreach ($this->parkour as $parkour => $pkdata) {
 
-                                //Check there is a Sign Pair, if not warn and exit
-                                $count = array();
-                                foreach ($this->parkour as $p) {
-                                    @$count[$p['name']] ++;
-                                }
-                                $howmanyparkour = $count[$pktovisit];
-
                                 if ($pkdata["type"] === 0 && $pkdata["name"] === $pktovisit) {
+
+                                    //Check there is a Sign Pair, if not warn
+                                    $count = array();
+                                    foreach ($this->parkour as $p) {
+                                        @$count[$p['name']] ++;
+                                    }
+                                    $howmanyparkour = $count[$pktovisit];
+
                                     $x = $pkdata["x"];
                                     $y = $pkdata["y"];
                                     $z = $pkdata["z"];
@@ -176,6 +173,15 @@ class Main extends PluginBase implements Listener {
                     }
                 } else {
                     //LIST HELP
+                    $sender->sendMessage(TextFormat::GREEN . $this->getMessage("help-title"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("help1"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("help2"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("help3"));
+                    $sender->sendMessage(TextFormat::GREEN . $this->getMessage("parkour-commands"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command1"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command2"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command3"));
+                    $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command4"));
                 }
         }
     }
@@ -209,7 +215,6 @@ class Main extends PluginBase implements Listener {
                         $amount = $idamount[1]; //$amount could still be string...
 
 
-
                         
 //If no reward given, set to 57
 
@@ -217,7 +222,6 @@ class Main extends PluginBase implements Listener {
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
-
 
 
                         
