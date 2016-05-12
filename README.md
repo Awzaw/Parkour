@@ -45,5 +45,5 @@ Both Start and Finish signs can be broken and remade - they will be automaticall
 
 Any problems, please let me know in the discussion thread, not the reviews.
 
-Any cheating that involves changing gamemode or teleporting should be disabled
+Any cheating that involves changing gamemode or teleporting is automatically disabled
 
