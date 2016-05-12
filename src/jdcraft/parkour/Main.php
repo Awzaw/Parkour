@@ -129,9 +129,9 @@ class Main extends PluginBase implements Listener {
                             $pkrand = $validpk[mt_rand(0, count($validpk) - 1)];
 
                             $parkourname = $pkrand["name"];
-                            $x = $pkrand["x"];
-                            $y = $pkrand["y"];
-                            $z = $pkrand["z"];
+                            $x = (int)$pkrand["x"];
+                            $y = (int)$pkrand["y"];
+                            $z = (int)$pkrand["z"];
                             $level = $pkrand["level"];
 
                             $pos = new Position($x, $y, $z, $this->getServer()->getLevelByName($level));
@@ -155,9 +155,9 @@ class Main extends PluginBase implements Listener {
                                     }
                                     $howmanyparkour = $count[$pktovisit];
 
-                                    $x = $pkdata["x"];
-                                    $y = $pkdata["y"];
-                                    $z = $pkdata["z"];
+                                    $x = (int)$pkdata["x"];
+                                    $y = (int)$pkdata["y"];
+                                    $z = (int)$pkdata["z"];
                                     $level = $pkdata["level"];
 
                                     $pos = new Position($x, $y, $z, $this->getServer()->getLevelByName($level));
@@ -287,9 +287,9 @@ class Main extends PluginBase implements Listener {
                         "type" => 0,
                         "reward" => ($id . ":" . $amount),
                         "name" => ($event->getLine(2)),
-                        "x" => $player->x,
-                        "y" => $player->y,
-                        "z" => $player->z,
+                        "x" => (int)$player->x,
+                        "y" => (int)$player->y,
+                        "z" => (int)$player->z,
                         "level" => $player->getLevel()->getFolderName(),
                         "top" => array(),
                         "maker" => $player->getName()
@@ -680,9 +680,9 @@ class Main extends PluginBase implements Listener {
         foreach ($pks as $p) {
 
             if ($p["type"] === 0) {
-                $x = $p["x"];
-                $y = $p["y"];
-                $z = $p["z"];
+                $x = (int)$p["x"];
+                $y = (int)$p["y"];
+                $z = (int)$p["z"];
                 $level = $p["level"];
             }
         }
