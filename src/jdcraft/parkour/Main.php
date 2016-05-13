@@ -559,6 +559,7 @@ class Main extends PluginBase implements Listener {
             //Delete this parkour marker 
             //
             //LOOP THROUGH ALL PARKOURS
+            
             foreach ($this->parkour as $subKey => $subArray) {
 
                 if ($parkourtype === 1 && $subArray["name"] == $parkourname && ($subArray["type"] === 0)) {
@@ -580,11 +581,6 @@ class Main extends PluginBase implements Listener {
                             return;
                         }
                     }
-
-                    //set to null first - unset() seems to be delayed sometimes?
-
-                    $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
-                    unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
 
                     $this->parkour[$subKey]["top"] = null;
                     unset($this->parkour[$subKey]["top"]); // And clear top scores when the FINISH sign is broken
@@ -611,9 +607,13 @@ class Main extends PluginBase implements Listener {
                         }
                     }
 
+               }
+                
+                  //set to null first - unset() seems to be delayed sometimes?
+
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = null;
                     unset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()]);
-                }
+
             }
 
             //Delete all sessions for players in this parkour
