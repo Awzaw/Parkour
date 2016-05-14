@@ -20,6 +20,7 @@
 
 namespace jdcraft\parkour;
 
+use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -640,6 +641,12 @@ class Main extends PluginBase implements Listener {
             }
         }
     }
+    
+        public function PlayerMove(PlayerMoveEvent $event) {
+    if (isset($this->sessions[$event->getPlayer()->getName()])) {
+                $event->getPlayer()->removeAllEffects();
+            }
+    }
 
     public function onGameModeChange(PlayerGameModeChangeEvent $event) {
         if (isset($this->sessions[$event->getPlayer()->getName()])) {
@@ -713,6 +720,8 @@ class Main extends PluginBase implements Listener {
             return "Language with key \"$key\" does not exist";
         }
     }
+    
+    
 
     function search($array, $key, $value) {
         $results = array();
