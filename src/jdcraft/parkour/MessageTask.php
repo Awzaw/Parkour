@@ -41,6 +41,8 @@ class MessageTask extends PluginTask {
             $this->plugin->getServer()->getScheduler()->cancelTask($this->getTaskId());
             return;
         }     
+                
+            $this->sender->removeAllEffects();
             $this->sender->sendPopup(TextFormat::GREEN . (time() - $this->plugin->sessions[$this->sender->getName()]["start"]) . " seconds");
 
     }

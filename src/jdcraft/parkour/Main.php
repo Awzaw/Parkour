@@ -217,6 +217,7 @@ class Main extends PluginBase implements Listener {
 
 
 
+
                         
 //If no reward given, set to 57
 
@@ -224,6 +225,7 @@ class Main extends PluginBase implements Listener {
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
+
 
 
 
@@ -538,16 +540,13 @@ class Main extends PluginBase implements Listener {
                         $sender->sendMessage($this->getMessage("best-parkour") . " " . $besttime . " by " . $bestplayer);
                     }
 
-                $task = new MessageTask($this, $sender, 10);
-                $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
-                
-               $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
-                
-                    
-                    } else {
+                    $task = new MessageTask($this, $sender, 10);
+                    $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
+
+                    $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
+                } else {
                     $sender->sendMessage(TextFormat::RED . $this->getMessage("already-playing") . " " . $this->sessions[$sender->getName()]["parkour"]);
                 }
-                
             }
         }
     }
@@ -647,12 +646,7 @@ class Main extends PluginBase implements Listener {
             }
         }
     }
-    
-        public function PlayerMove(PlayerMoveEvent $event) {
-    if (isset($this->sessions[$event->getPlayer()->getName()])) {
-                $event->getPlayer()->removeAllEffects();
-            }
-    }
+
 
     public function onGameModeChange(PlayerGameModeChangeEvent $event) {
         if (isset($this->sessions[$event->getPlayer()->getName()])) {
@@ -726,8 +720,6 @@ class Main extends PluginBase implements Listener {
             return "Language with key \"$key\" does not exist";
         }
     }
-    
-    
 
     function search($array, $key, $value) {
         $results = array();
