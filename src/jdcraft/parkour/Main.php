@@ -47,7 +47,7 @@ class Main extends PluginBase implements Listener {
      * @var Config
      */
     private $parkour;
-    private $sessions;
+    public $sessions;
     private $lang, $tag;
 
     public function onEnable() {
@@ -538,10 +538,16 @@ class Main extends PluginBase implements Listener {
                         $sender->sendMessage($this->getMessage("best-parkour") . " " . $besttime . " by " . $bestplayer);
                     }
 
-                    $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
-                } else {
+                $task = new MessageTask($this, $sender, 10);
+                $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
+                
+               $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
+                
+                    
+                    } else {
                     $sender->sendMessage(TextFormat::RED . $this->getMessage("already-playing") . " " . $this->sessions[$sender->getName()]["parkour"]);
                 }
+                
             }
         }
     }
