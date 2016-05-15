@@ -140,41 +140,45 @@ class Main extends PluginBase implements Listener {
                             $sender->sendMessage(TextFormat::GREEN . $this->getMessage("random-parkour") . " " . $parkourname);
                             break;
 
+                        case "killbrick":
+
+                            $pktochange = $param[1];
+                            $killbrickID = $param[2];
+
+                            //Set Kill Brick in START Sign
+
+                            foreach (array_keys($this->parkour) as $pk) {
+                                if ($this->parkour[$pk]["type"] === 0 && ($this->parkour[$pk]["name"] === $pktochange)) {
+
+                                    if (substr($killbrickID, 0, 2) === "no") {
+
+                                        $this->parkour[$pk]["killbrick"] = null;
+                                        unset($this->parkour[$pk]["killbrick"]);
+                                        $this->saveParkours();
+                                        $sender->sendMessage("KillBrick Removed");
+                                        return;
+                                    } else {
+
+                                        $killblock = Item::get($killbrickID);
+                                        if (!$killblock instanceof ItemBlock) {
+                                            $sender->sendMessage("Invalid ID");
+                                            return;
+                                        }
+                                        $idstring = Item::get($killbrickID)->getName();
+                                    }
+
+                                    $this->parkour[$pk]["killbrick"] = $killbrickID;
+                                    $this->saveParkours();
+                                    $sender->sendMessage("KillBrick Set: " . $idstring);
+                                }
+                            }
+                            break;
+
+
                         default:
 
-                            if (strtolower($param[1]) === "killbrick") {
-                                $pktochange = $param[0];
-                                $killbrickID = $param[2];
 
-                                //Set Kill Brick in START Sign
-                                $startfound = false;
-                                foreach (array_keys($this->parkour) as $pk) {
-                                    if ($this->parkour[$pk]["type"] === 0 && ($this->parkour[$pk]["name"] === $pktochange)) {
-
-                                        if (substr($killbrickID, 0, 2) === "no") {
-                                            
-                                            unset($this->parkour[$pk]["killbrick"]);
-                                            $sender->sendMessage("KillBrick Removed");
-                                            return;
-                                            
-                                        } else {
-                                            
-                                            $killblock = Item::get($killbrickID);
-                                            if (!$killblock instanceof ItemBlock) {
-                                                $sender->sendMessage("Invalid ID");
-                                                return;
-                                            }
-                                            $idstring = Item::get($killbrickID)->getName();
-                                        }
-
-                                        $this->parkour[$pk]["killbrick"] = $killbrickID;
-                                        $sender->sendMessage("KillBrick Set: " . $idstring);
-                                    }
-                                }
-                                return;
-                            }
-
-                            //LOAD THEME
+                            //GO TO A PARKOUR
                             $pktovisit = $param[0];
                             $howmanyparkour = 0;
                             foreach ($this->parkour as $parkour => $pkdata) {
@@ -253,6 +257,7 @@ class Main extends PluginBase implements Listener {
 
 
 
+
                         
 //If no reward given, set to 57
 
@@ -260,6 +265,7 @@ class Main extends PluginBase implements Listener {
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
+
 
 
 
@@ -580,10 +586,12 @@ class Main extends PluginBase implements Listener {
 
                     if (!isset($parkour["killbrick"]))
                         $parkour["killbrick"] = 0;
+                    echo("Killbrick Used: " . $parkour["killbrick"] . "\n");
 
                     $task = new MessageTask($this, $sender, 10, $parkour["killbrick"]);
-                    $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
-
+                    $taskid = $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
+                    $task->setHandler($taskid);
+                    
                     $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time(), "killbrick" => $parkour["killbrick"]);
                 } else {
                     $sender->sendMessage(TextFormat::RED . $this->getMessage("already-playing") . " " . $this->sessions[$sender->getName()]["parkour"]);
