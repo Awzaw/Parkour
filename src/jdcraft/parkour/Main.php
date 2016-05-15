@@ -150,7 +150,7 @@ class Main extends PluginBase implements Listener {
                             foreach (array_keys($this->parkour) as $pk) {
                                 if ($this->parkour[$pk]["type"] === 0 && ($this->parkour[$pk]["name"] === $pktochange)) {
 
-                                    if (strtolower($pk["maker"]) !== strtolower($sender->getName())){
+                                    if (strtolower($this->parkour[$pk]["maker"]) !== strtolower($sender->getName())){
                                         $sender->sendMessage(TextFormat::GREEN . $this->getMessage("no-permission-break-others"));
                                         return;
                                     }
@@ -255,13 +255,6 @@ class Main extends PluginBase implements Listener {
                     else
                         $amount = $idamount[1]; //$amount could still be string...
 
-
-
-
-
-
-
-
                         
 //If no reward given, set to 57
 
@@ -270,14 +263,6 @@ class Main extends PluginBase implements Listener {
                     else
                         $id = $idamount[0]; //$id could be string or int still...
 
-
-
-
-
-
-
-
-                        
 // Check if the string reward is a valid block
 
                     if (!is_numeric($id)) {// if ID is a string
@@ -588,8 +573,13 @@ class Main extends PluginBase implements Listener {
                         $sender->sendMessage($this->getMessage("best-parkour") . " " . $besttime . " by " . $bestplayer);
                     }
 
-                    if (!isset($parkour["killbrick"]))
-                        $parkour["killbrick"] = 0;
+                    if (!isset($parkour["killbrick"])){
+                    $parkour["killbrick"] = 0;    
+                    }else{
+
+                    $sender->sendMessage(TEXTFORMAT::RED . "BEWARE THE KILLBRICK: " . Item::get($parkour["killbrick"])->getName());
+  
+                    }
 
                     $task = new MessageTask($this, $sender, 10, $parkour["killbrick"]);
                     $taskid = $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);

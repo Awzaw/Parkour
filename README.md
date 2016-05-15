@@ -30,9 +30,13 @@ COMMANDS:
 
 /pk list - displays a list of all parkours, green names are valid parkour with a start and stop, red names are parkour start signs with no finish sign, grey names are the makers
 
-/pk [name of parkour] - teleports the player to the start for the parkour
+/pk {name of parkour} - teleports the player to the start for the parkour
 
 /pk go - teleports the player to a random parkour with a start and finish sign.
+
+/pk killbrick {name of parkour} {ID} - set the killbrick to ID (tp players back to parkour Start)
+
+/pk killbrick {name of parkour} none/no - No killbrick
 
 
 Permissions (all default to OP)
