@@ -18,32 +18,64 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 namespace jdcraft\parkour;
 
 use pocketmine\scheduler\PluginTask;
 use pocketmine\utils\TextFormat;
+use pocketmine\level\Position;
 
 class MessageTask extends PluginTask {
-	
-    public function __construct(Main $plugin, $sender, $duration){
-    	parent::__construct($plugin);
-        
+
+    public function __construct(Main $plugin, $sender, $duration, $killbrick) {
+        parent::__construct($plugin);
+
         $this->plugin = $plugin;
         $this->sender = $sender;
         $this->duration = $duration;
+        $this->killbrick = $killbrick;
     }
-    
-    public function onRun($tick){
-    	$this->plugin = $this->getOwner();
-        
-        if (!isset($this->plugin->sessions[$this->sender->getName()])){
+
+    public function onRun($tick) {
+        $this->plugin = $this->getOwner();
+
+        if (!isset($this->plugin->sessions[$this->sender->getName()])) {
             $this->plugin->getServer()->getScheduler()->cancelTask($this->getTaskId());
             return;
-        }     
-                
-            $this->sender->removeAllEffects();
-            $this->sender->sendPopup(TextFormat::GREEN . (time() - $this->plugin->sessions[$this->sender->getName()]["start"]) . " seconds");
+        }
 
+        $this->sender->removeAllEffects();
+
+        $blockbelow = $this->sender->getLevel()->getBlock($this->sender->floor()->subtract(0, 1));
+
+        if (($this->killbrick !== 0) && ($blockbelow->getID() == $this->killbrick)) {
+
+            $pkname = $this->plugin->sessions[$this->sender->getName()]["parkour"];
+            unset($this->plugin->sessions[$this->sender->getName()]);
+
+            // teleport player to START SIGN
+            $pks = $this->plugin->search($this->plugin->parkour, 'name', $pkname);
+            //get the x y z and level of the Start Sign
+            foreach ($pks as $p) {
+
+                if ($p["type"] === 0) {
+                    $x = $p["x"];
+                    $y = $p["y"];
+                    $z = $p["z"];
+                    $level = $p["level"];
+                }
+            }
+
+            $pos = new Position($x, $y, $z, $this->plugin->getServer()->getLevelByName($level));
+            $this->sender->teleport($pos);
+
+            $this->sender->sendMessage(TextFormat::RED . $this->plugin->getMessage("start-again"));
+            $this->sender->sendMessage(TextFormat::BLUE . $this->plugin->getMessage("click-start") . " " . $pkname);
+
+            $this->plugin->getServer()->getScheduler()->cancelTask($this->getTaskId());
+            return;
+        }
+
+        $this->sender->sendPopup(TextFormat::GREEN . (time() - $this->plugin->sessions[$this->sender->getName()]["start"]) . " seconds");
     }
+
 }

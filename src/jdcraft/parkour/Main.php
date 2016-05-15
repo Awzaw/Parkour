@@ -20,7 +20,6 @@
 
 namespace jdcraft\parkour;
 
-use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\SignChangeEvent;
 use pocketmine\event\player\PlayerInteractEvent;
@@ -46,7 +45,7 @@ class Main extends PluginBase implements Listener {
     /**
      * @var Config
      */
-    private $parkour;
+    public $parkour;
     public $sessions;
     private $lang, $tag;
 
@@ -143,6 +142,39 @@ class Main extends PluginBase implements Listener {
 
                         default:
 
+                            if (strtolower($param[1]) === "killbrick") {
+                                $pktochange = $param[0];
+                                $killbrickID = $param[2];
+
+                                //Set Kill Brick in START Sign
+                                $startfound = false;
+                                foreach (array_keys($this->parkour) as $pk) {
+                                    if ($this->parkour[$pk]["type"] === 0 && ($this->parkour[$pk]["name"] === $pktochange)) {
+
+                                        if (substr($killbrickID, 0, 2) === "no") {
+                                            
+                                            unset($this->parkour[$pk]["killbrick"]);
+                                            $sender->sendMessage("KillBrick Removed");
+                                            return;
+                                            
+                                        } else {
+                                            
+                                            $killblock = Item::get($killbrickID);
+                                            if (!$killblock instanceof ItemBlock) {
+                                                $sender->sendMessage("Invalid ID");
+                                                return;
+                                            }
+                                            $idstring = Item::get($killbrickID)->getName();
+                                        }
+
+                                        $this->parkour[$pk]["killbrick"] = $killbrickID;
+                                        $sender->sendMessage("KillBrick Set: " . $idstring);
+                                    }
+                                }
+                                return;
+                            }
+
+                            //LOAD THEME
                             $pktovisit = $param[0];
                             $howmanyparkour = 0;
                             foreach ($this->parkour as $parkour => $pkdata) {
@@ -218,6 +250,9 @@ class Main extends PluginBase implements Listener {
 
 
 
+
+
+
                         
 //If no reward given, set to 57
 
@@ -225,6 +260,9 @@ class Main extends PluginBase implements Listener {
                         $id = 57; //Put these in config.yml
                     else
                         $id = $idamount[0]; //$id could be string or int still...
+
+
+
 
 
 
@@ -389,6 +427,7 @@ class Main extends PluginBase implements Listener {
 
     public function onInteract(PlayerInteractEvent $event) {
 
+
         if ($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -398,7 +437,6 @@ class Main extends PluginBase implements Listener {
             return;
 
         $sender = $event->getPlayer();
-
 
         //If it's a parkour block that was clicked
         if (isset($this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()])) {
@@ -540,10 +578,13 @@ class Main extends PluginBase implements Listener {
                         $sender->sendMessage($this->getMessage("best-parkour") . " " . $besttime . " by " . $bestplayer);
                     }
 
-                    $task = new MessageTask($this, $sender, 10);
+                    if (!isset($parkour["killbrick"]))
+                        $parkour["killbrick"] = 0;
+
+                    $task = new MessageTask($this, $sender, 10, $parkour["killbrick"]);
                     $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
 
-                    $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time());
+                    $this->sessions[$sender->getName()] = array("parkour" => $parkourplaying, "start" => time(), "killbrick" => $parkour["killbrick"]);
                 } else {
                     $sender->sendMessage(TextFormat::RED . $this->getMessage("already-playing") . " " . $this->sessions[$sender->getName()]["parkour"]);
                 }
@@ -646,7 +687,6 @@ class Main extends PluginBase implements Listener {
             }
         }
     }
-
 
     public function onGameModeChange(PlayerGameModeChangeEvent $event) {
         if (isset($this->sessions[$event->getPlayer()->getName()])) {
