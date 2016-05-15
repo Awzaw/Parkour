@@ -123,7 +123,7 @@ class Main extends PluginBase implements Listener {
                             }
 
                             if (empty($validpk)) {
-                                echo ("No Valid PARKOURS\n");
+                            $sender->sendMessage(TextFormat::RED . $this->getMessage("no-parkour") );
                             }
 
                             $pkrand = $validpk[mt_rand(0, count($validpk) - 1)];
@@ -150,6 +150,10 @@ class Main extends PluginBase implements Listener {
                             foreach (array_keys($this->parkour) as $pk) {
                                 if ($this->parkour[$pk]["type"] === 0 && ($this->parkour[$pk]["name"] === $pktochange)) {
 
+                                    if (strtolower($pk["maker"]) !== strtolower($sender->getName())){
+                                        $sender->sendMessage(TextFormat::GREEN . $this->getMessage("no-permission-break-others"));
+                                        return;
+                                    }
                                     if (substr($killbrickID, 0, 2) === "no") {
 
                                         $this->parkour[$pk]["killbrick"] = null;
@@ -586,7 +590,6 @@ class Main extends PluginBase implements Listener {
 
                     if (!isset($parkour["killbrick"]))
                         $parkour["killbrick"] = 0;
-                    echo("Killbrick Used: " . $parkour["killbrick"] . "\n");
 
                     $task = new MessageTask($this, $sender, 10, $parkour["killbrick"]);
                     $taskid = $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
