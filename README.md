@@ -1,3 +1,5 @@
+VERSION 1.0.8
+
 TO INSTALL: Place the .phar in your plugins folder... restart... make sure you have the correct permissions (see below) if you use a permissions manager, or make signs as OP.
 
 First make a START sign with the following lines:
