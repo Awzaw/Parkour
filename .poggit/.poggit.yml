@@ -1,4 +1,18 @@
 ---
 branches: master
-projects: []
+
+projects:
+  first:
+    path: Parkour
+    model: default
+    lang: v1.0
+    release:
+      categories:
+        - minigames
+      prerelease: false
+      description: {file-md: description.md}
+      license: {file-raw: LICENSE.txt}
+      icon: {link: http://www.jdcraft.net/img/obstacle.png}
+      spoon:
+        PMMP: 1.6dev
 ...
