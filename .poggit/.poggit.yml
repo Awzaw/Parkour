@@ -3,6 +3,6 @@ branches: master
 
 projects:
   Parkour:
-    path: ""
+    path: /Parkour/
     model: default
 ...
