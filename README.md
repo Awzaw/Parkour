@@ -1,4 +1,5 @@
 ![Logo](https://forums.pocketmine.net/data/resource_icons/2/2021.jpg?1467099486)
+
 VERSION 1.0.8
 
 TO INSTALL: Place the .phar in your plugins folder... restart... make sure you have the correct permissions (see below) if you use a permissions manager, or make signs as OP.
