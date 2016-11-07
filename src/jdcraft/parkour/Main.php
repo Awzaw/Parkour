@@ -122,8 +122,9 @@ class Main extends PluginBase implements Listener {
                                 }
                             }
 
-                            if (empty($validpk)) {
+                            if (empty($validpk) || (count($validpk) == 0)) {
                             $sender->sendMessage(TextFormat::RED . $this->getMessage("no-parkour") );
+                            break;
                             }
 
                             $pkrand = $validpk[mt_rand(0, count($validpk) - 1)];
