@@ -1,10 +1,9 @@
 name: Parkour
-version: "1.0.9"
+version: "1.1.0"
 author: jdcraft
 api:
-- 1.13.0
-- 1.14.0
 - 2.0.0
+- 2.1.0
 main: jdcraft\parkour\Main
 
 permissions:
