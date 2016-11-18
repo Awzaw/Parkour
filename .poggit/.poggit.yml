@@ -1,0 +1,7 @@
+---
+branches: master
+projects:
+  Parkour:
+    path: ""
+    model: default
+...
