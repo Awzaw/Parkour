@@ -1,6 +1,6 @@
-![Logo](https://forums.pocketmine.net/data/resource_icons/2/2021.jpg?1467099486)
+![Logo](http://jdcraft.net/img/obstacle250.png)
 
-VERSION 1.0.8
+VERSION 1.1.0
 
 TO INSTALL: Place the .phar in your plugins folder... restart... make sure you have the correct permissions (see below) if you use a permissions manager, or make signs as OP.
 
