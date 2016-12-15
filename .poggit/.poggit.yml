@@ -4,5 +4,5 @@ projects:
   Parkour:
     path: ""
     model: default
-    icon: jdcraft.net/img/obstacle250.png
+    icon: http://jdcraft.net/img/obstacle250.png
 ...
