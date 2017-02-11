@@ -53,19 +53,30 @@ class Main extends PluginBase implements Listener {
         if (!file_exists($this->getDataFolder())) {
             mkdir($this->getDataFolder());
         }
+        
 
         $this->parkour = array();
         $this->sessions = [];
 
         $this->saveResource("language.properties");
         $this->saveResource("parkour.yml");
+        $this->saveResource("config.yml");
         $this->lang = new Config($this->getDataFolder() . "language.properties", Config::PROPERTIES);
         $this->tag = new Config($this->getDataFolder() . "parkour.yml", Config::YAML);
 
         $parkourYml = new Config($this->getDataFolder() . "ParkourData.yml", Config::YAML);
+        $this->cfg = new Config($this->getDataFolder() . "config.yml", Config::YAML);
+        $this->cfg->save();
         $this->parkour = $parkourYml->getAll();
 
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
+        
+        if($this->cfg->get("moneyreward") === true) {
+        	if($this->getServer()->getPluginManager()->getPlugin("EconomyAPI") === null) {
+        		$this->getLogger()->warning("Please install EconomyAPI to enable Money Reward feature or disable MoneyReward in config.yml!");
+        		$this->setEnabled(false);
+        	}
+        }
     }
 
     public function onDisable() {
@@ -528,6 +539,12 @@ class Main extends PluginBase implements Listener {
 
                     $sender->getInventory()->addItem(new Item($id, 0, $amount));
                     $sender->sendMessage(TextFormat::AQUA . $this->getMessage("parkour-completed") . " " . $parkourname . " for " . $amount . " x " . $idstring . " in " . $timespent);
+                    
+                    if($this->cfg->get("moneyreward") == true) {
+                    	$cash = $this->cfg->get("money");
+                    	$money = $this->getServer()->getPluginManager()->getPlugin("EconomyAPI")->addMoney($sender->getName(), $cash);
+                    	$sender->sendMessage("[Parkour] You have been rewarded with Money!");
+                    }
 
                     unset($this->sessions[$sender->getName()]);
 
