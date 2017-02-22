@@ -588,11 +588,6 @@ class Main extends PluginBase implements Listener {
 
 //ANTICHEATS
 
-    /**
-     * @param PlayerCommandPreprocessEvent $event
-     *
-     * @priority MONITOR
-     */
     public function onPlayerCommand(PlayerCommandPreprocessEvent $event) {
 
         $sender = $event->getPlayer();
