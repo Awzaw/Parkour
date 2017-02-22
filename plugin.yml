@@ -1,7 +1,7 @@
 name: Parkour
-version: "1.2"
+version: "1.3"
 author: jdcraft
-api: [2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3]
+api: [2.0.0, 3.0.0-ALPHA1, 3.0.0-ALPHA2, 3.0.0-ALPHA3, 3.0.0-ALPHA4]
 main: jdcraft\parkour\Main
 
 permissions:
@@ -10,7 +10,6 @@ permissions:
   children:
    parkour.create:
     description: Allows player to make and break their own parkours
-
 commands:
  pk:
   description: Parkour Commands

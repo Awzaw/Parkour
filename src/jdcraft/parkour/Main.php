@@ -19,8 +19,10 @@ use pocketmine\event\player\PlayerGameModeChangeEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\event\entity\EntityTeleportEvent;
+use pocketmine\event\player\PlayerCommandPreprocessEvent;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
+use pocketmine\block\BlockIds;
 
 class Main extends PluginBase implements Listener {
 
@@ -54,7 +56,7 @@ class Main extends PluginBase implements Listener {
             case "pk":
                 if(!$sender instanceof Player) {
                     $sender->sendMessage(TextFormat::GREEN . $this->getMessage("run-in-game"));
-                    return true;
+                    break;
                 }
 
                 if(isset($param[0]) && (strtolower($param[0]) !== "help")) {
@@ -82,7 +84,7 @@ class Main extends PluginBase implements Listener {
                                 }
                             }
                             $sender->sendMessage($pklist);
-                            break;
+                            return true;
 
                         case "go":
 
@@ -111,7 +113,7 @@ class Main extends PluginBase implements Listener {
                             $pos = new Position($x, $y, $z, $this->getServer()->getLevelByName($level));
                             $sender->teleport($pos);
                             $sender->sendMessage(TextFormat::GREEN . $this->getMessage("random-parkour") . " " . $parkourname);
-                            break;
+                            return true;
 
                         case "killbrick":
 
@@ -123,26 +125,26 @@ class Main extends PluginBase implements Listener {
                                 if($this->parkour[$pk]["type"] === 0 && ($this->parkour[$pk]["name"] === $pktochange)) {
                                     if(strtolower($this->parkour[$pk]["maker"]) !== strtolower($sender->getName())) {
                                         $sender->sendMessage(TextFormat::GREEN . $this->getMessage("no-permission-break-others"));
-                                        return;
+                                        break;
                                     }
                                     if(substr($killbrickID, 0, 2) === "no") {
-
                                         $this->parkour[$pk]["killbrick"] = null;
                                         unset($this->parkour[$pk]["killbrick"]);
                                         $this->saveParkours();
                                         $sender->sendMessage("KillBrick Removed");
-                                        return;
+                                        return true;
                                     } else {
                                         $killblock = Item::get($killbrickID);
                                         if(!$killblock instanceof ItemBlock) {
                                             $sender->sendMessage("Invalid ID");
-                                            return;
+                                            break 2;
                                         }
                                         $idstring = Item::get($killbrickID)->getName();
                                     }
                                     $this->parkour[$pk]["killbrick"] = $killbrickID;
                                     $this->saveParkours();
                                     $sender->sendMessage("KillBrick Set: " . $idstring);
+                                    return true;
                                 }
                             }
                             break;
@@ -151,7 +153,6 @@ class Main extends PluginBase implements Listener {
 
                             //GO TO A PARKOUR
                             $pktovisit = $param[0];
-                            $howmanyparkour = 0;
                             foreach($this->parkour as $parkour => $pkdata) {
 
                                 if($pkdata["type"] === 0 && $pkdata["name"] === $pktovisit) {
@@ -161,7 +162,10 @@ class Main extends PluginBase implements Listener {
                                         @$count[$p['name']]++;
                                     }
                                     $howmanyparkour = $count[$pktovisit];
-
+                                    if($howmanyparkour < 2) {
+                                        $sender->sendMessage(TextFormat::RED . $this->getMessage("incomplete-parkour") . " " . $pktovisit);
+                                        break 2;
+                                    }
                                     $x = (int) $pkdata["x"];
                                     $y = (int) $pkdata["y"];
                                     $z = (int) $pkdata["z"];
@@ -169,13 +173,10 @@ class Main extends PluginBase implements Listener {
                                     $pos = new Position($x, $y, $z, $this->getServer()->getLevelByName($level));
                                     $sender->teleport($pos);
                                     $sender->sendMessage(TextFormat::GREEN . $this->getMessage("teleport-start") . " " . $pktovisit);
-                                    break;
+                                    return true;
                                 }
                             }
-                            if($howmanyparkour < 2) {
-                                $sender->sendMessage(TextFormat::RED . $this->getMessage("incomplete-parkour") . " " . $pktovisit);
-                            }
-                            break;
+                            $sender->sendMessage(TextFormat::GREEN . $this->getMessage("invalid-parkour") . " " . $pktovisit);
                     }
                 } else {
                     //LIST HELP
@@ -188,8 +189,10 @@ class Main extends PluginBase implements Listener {
                     $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command2"));
                     $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command3"));
                     $sender->sendMessage(TextFormat::YELLOW . $this->getMessage("parkour-command4"));
+                    return true;
                 }
         }
+        return false;
     }
 
     public function onSignChange(SignChangeEvent $event) {
@@ -369,7 +372,7 @@ class Main extends PluginBase implements Listener {
         }
 
         $block = $event->getBlock();
-        if(!($block->getID() == 63 or $block->getID() == 68 or $block->getID() == 323)) {
+        if(!in_array($block->getID() , [BlockIds::SIGN_POST, BlockIds::WALL_SIGN])) {
             return;
         }
 
@@ -513,7 +516,7 @@ class Main extends PluginBase implements Listener {
 
     public function onBlockBreak(BlockBreakEvent $event) {
         $block = $event->getBlock();
-        if(!($block->getID() == 63 or $block->getID() == 68 or $block->getID() == 323)) {
+        if(!in_array($block->getID() , [BlockIds::SIGN_POST, BlockIds::WALL_SIGN])) {
             return;
         }
 
@@ -584,6 +587,27 @@ class Main extends PluginBase implements Listener {
     }
 
 //ANTICHEATS
+
+    /**
+     * @param PlayerCommandPreprocessEvent $event
+     *
+     * @priority MONITOR
+     */
+    public function onPlayerCommand(PlayerCommandPreprocessEvent $event) {
+
+        $sender = $event->getPlayer();
+        if(!isset($this->sessions[$sender->getName()])) {
+            return;
+        }
+        $message = $event->getMessage();
+        if (strtolower(substr($message, 0, 5) === "/kill")) { //Command
+            return;
+        }
+        else if (strtolower(substr($message, 0, 1) === "/")) {
+            $sender->sendMessage($this->getMessage("no-commands"));
+            $event->setCancelled(true);
+        }
+    }
 
     public function onPlayerTeleport(EntityTeleportEvent $event) {
         $entity = $event->getEntity();
