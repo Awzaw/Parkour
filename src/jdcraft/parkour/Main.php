@@ -196,7 +196,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onSignChange(SignChangeEvent $event) {
-
+        if ($event->isCancelled()) return;
         if(($data = $this->checkTag($event->getLine(0), $event->getLine(1))) !== false) {
             $player = $event->getPlayer();
             if(!$player->hasPermission("parkour.create")) {
@@ -365,8 +365,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onInteract(PlayerInteractEvent $event) {
-
-
+        if ($event->isCancelled()) return;
         if($event->getAction() !== PlayerInteractEvent::RIGHT_CLICK_BLOCK) {
             return;
         }
@@ -515,6 +514,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onBlockBreak(BlockBreakEvent $event) {
+        if ($event->isCancelled()) return;
         $block = $event->getBlock();
         if(!in_array($block->getID() , [BlockIds::SIGN_POST, BlockIds::WALL_SIGN])) {
             return;
@@ -589,7 +589,7 @@ class Main extends PluginBase implements Listener {
 //ANTICHEATS
 
     public function onPlayerCommand(PlayerCommandPreprocessEvent $event) {
-
+        if ($event->isCancelled()) return;
         $sender = $event->getPlayer();
         if(!isset($this->sessions[$sender->getName()])) {
             return;
@@ -605,6 +605,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onPlayerTeleport(EntityTeleportEvent $event) {
+        if ($event->isCancelled()) return;
         $entity = $event->getEntity();
         if($entity instanceof Player) {
             if(isset($this->sessions[$entity->getName()])) {
@@ -614,6 +615,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onGameModeChange(PlayerGameModeChangeEvent $event) {
+        if ($event->isCancelled()) return;
         if(isset($this->sessions[$event->getPlayer()->getName()])) {
             $event->setCancelled(true);
             $event->getPlayer()->sendMessage($this->getMessage("no-cheat"));
@@ -621,8 +623,7 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onPlayerQuit(PlayerQuitEvent $event) {
-
-//Clean up
+        if ($event->isCancelled()) return;
 
         if(isset($this->sessions[$event->getPlayer()->getName()])) {
             unset($this->sessions[$event->getPlayer()->getName()]);
@@ -631,13 +632,14 @@ class Main extends PluginBase implements Listener {
 
 //Clean up again, why not?
     public function onJoin(PlayerJoinEvent $event) {
-        //Clear Session if left over from previous session....
+        if ($event->isCancelled()) return;
         if(isset($this->sessions[$event->getPlayer()->getName()])) {
             unset($this->sessions[$event->getPlayer()->getName()]);
         }
     }
 
     public function onPlayerRespawn(PlayerRespawnEvent $event) {
+        if ($event->isCancelled()) return;
         //TP back to Start
         if(!isset($this->sessions[$event->getPlayer()->getName()])) {
             return;
