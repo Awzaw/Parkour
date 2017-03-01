@@ -637,7 +637,6 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onPlayerRespawn(PlayerRespawnEvent $event) {
-        if ($event->isCancelled()) return;
         //TP back to Start
         if(!isset($this->sessions[$event->getPlayer()->getName()])) {
             return;
