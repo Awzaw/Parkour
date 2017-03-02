@@ -623,7 +623,6 @@ class Main extends PluginBase implements Listener {
     }
 
     public function onPlayerQuit(PlayerQuitEvent $event) {
-        if ($event->isCancelled()) return;
         if(isset($this->sessions[$event->getPlayer()->getName()])) {
             unset($this->sessions[$event->getPlayer()->getName()]);
         }
