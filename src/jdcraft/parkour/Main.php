@@ -229,9 +229,8 @@ class Main extends PluginBase implements Listener {
                     // Check if the string reward is a valid block
                     if(!is_numeric($id)) {
                         $rewardblock = Item::fromString($id);
-                        if(!$rewardblock instanceof ItemBlock) {
+                        if(!$rewardblock instanceof Item) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
-
                             break;
                         }
                         $idstring = $id;
@@ -242,7 +241,7 @@ class Main extends PluginBase implements Listener {
                         }
                         $rewardblock = Item::get($id);
 
-                        if(!$rewardblock instanceof ItemBlock) {
+                        if(!$rewardblock instanceof Item) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
                             break;
                         }
