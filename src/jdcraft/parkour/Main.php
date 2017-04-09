@@ -28,7 +28,8 @@ class Main extends PluginBase implements Listener {
 
     public $parkour;
     public $sessions;
-    private $lang, $tag;
+    private $lang, $tag, $cfg, $basichud;
+    private $purePerms;
 
     public function onEnable() {
         if(!file_exists($this->getDataFolder())) {
@@ -37,13 +38,20 @@ class Main extends PluginBase implements Listener {
 
         $this->parkour = [];
         $this->sessions = [];
+        $this->purePerms = $this->getServer()->getPluginManager()->getPlugin("PurePerms");
 
+        if ($this->purePerms == null) {
+            $this->getLogger()->info("PurePerms is not enabled, you may have conflicts with BasicHUD");
+        }
         $this->saveResource("language.properties");
         $this->saveResource("parkour.yml");
+        $this->saveResource("config.yml");
         $this->lang = new Config($this->getDataFolder() . "language.properties", Config::PROPERTIES);
         $this->tag = new Config($this->getDataFolder() . "parkour.yml", Config::YAML);
+        $this->cfg = new Config($this->getDataFolder() . "config.yml", Config::YAML);
         $parkourYml = new Config($this->getDataFolder() . "ParkourData.yml", Config::YAML);
         $this->parkour = $parkourYml->getAll();
+        $this->basichud = $this->cfg->get("basichud-compatibility");
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
     }
 
@@ -460,6 +468,10 @@ class Main extends PluginBase implements Listener {
                     $sender->getInventory()->addItem(new Item($id, 0, $amount));
                     $sender->sendMessage(TextFormat::AQUA . $this->getMessage("parkour-completed") . " " . $parkourname . " for " . $amount . " x " . $idstring . " in " . $timespent);
                     unset($this->sessions[$sender->getName()]);
+
+                    if (isset($this->purePerms) && $this->basichud) {
+                        $this->purePerms->getUserDataMgr()->unsetPermission($sender, "-basichud.user");
+                    }
                     return;
                 }
 
@@ -502,6 +514,10 @@ class Main extends PluginBase implements Listener {
                         $sender->sendMessage(TEXTFORMAT::RED . "BEWARE THE KILLBRICK: " . Item::get($parkour["killbrick"])->getName());
                     }
                     $task = new MessageTask($this, $sender, 10, $parkour["killbrick"]);
+                    if (isset($this->purePerms) && $this->basichud) {
+                        $this->purePerms->getUserDataMgr()->setPermission($sender, "-basichud.user");
+                    }
+
                     $taskid = $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
                     $task->setHandler($taskid);
                     $this->sessions[$sender->getName()] = ["parkour" => $parkourplaying, "start" => time(), "killbrick" => $parkour["killbrick"]];
@@ -595,6 +611,9 @@ class Main extends PluginBase implements Listener {
         }
         $message = $event->getMessage();
         if (strtolower(substr($message, 0, 5) === "/kill")) { //Command
+            if (isset($this->purePerms) && $this->basichud) {
+                $this->purePerms->getUserDataMgr()->unsetPermission($sender, "-basichud.user");
+            }
             return;
         }
         else if (strtolower(substr($message, 0, 1) === "/")) {
@@ -624,6 +643,9 @@ class Main extends PluginBase implements Listener {
     public function onPlayerQuit(PlayerQuitEvent $event) {
         if(isset($this->sessions[$event->getPlayer()->getName()])) {
             unset($this->sessions[$event->getPlayer()->getName()]);
+            if (isset($this->purePerms) && $this->basichud) {
+                $this->purePerms->getUserDataMgr()->unsetPermission($event->getPlayer(), "-basichud.user");
+            }
         }
     }
 
@@ -631,6 +653,11 @@ class Main extends PluginBase implements Listener {
     public function onJoin(PlayerJoinEvent $event) {
         if(isset($this->sessions[$event->getPlayer()->getName()])) {
             unset($this->sessions[$event->getPlayer()->getName()]);
+        }
+        //WARNING - You can not use the negative -basichud.user permission with basichud-compatibility: true
+        $event->getPlayer();
+        if (isset($this->purePerms) && $this->basichud) {
+            $this->purePerms->getUserDataMgr()->unsetPermission($event->getPlayer(), "-basichud.user");
         }
     }
 
