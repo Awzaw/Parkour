@@ -26,6 +26,7 @@ use pocketmine\block\BlockIds;
 
 class Main extends PluginBase implements Listener {
 
+    const SIGNIDS = [63, 68];
     public $parkour;
     public $sessions;
     private $lang, $tag, $cfg, $basichud;
@@ -378,7 +379,7 @@ class Main extends PluginBase implements Listener {
         }
 
         $block = $event->getBlock();
-        if(!in_array($block->getID() , [BlockIds::SIGN_POST, BlockIds::WALL_SIGN])) {
+        if(!in_array($block->getID() , self::SIGNIDS)) {
             return;
         }
 
@@ -531,7 +532,7 @@ class Main extends PluginBase implements Listener {
     public function onBlockBreak(BlockBreakEvent $event) {
         if ($event->isCancelled()) return;
         $block = $event->getBlock();
-        if(!in_array($block->getID() , [BlockIds::SIGN_POST, BlockIds::WALL_SIGN])) {
+        if(!in_array($block->getID() , self::SIGNIDS)) {
             return;
         }
 
