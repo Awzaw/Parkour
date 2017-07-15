@@ -60,7 +60,7 @@ class Main extends PluginBase implements Listener {
         $this->saveParkours();
     }
 
-    public function onCommand(CommandSender $sender, Command $cmd, $label, array $param) {
+    public function onCommand(CommandSender $sender, Command $cmd, string $label, array $param) : bool{
         switch($cmd->getName()) {
             case "pk":
                 if(!$sender instanceof Player) {

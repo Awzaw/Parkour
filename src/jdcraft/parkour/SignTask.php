@@ -13,7 +13,7 @@ class SignTask extends PluginTask{
         $this->signtext = $signtext;
     }
 
-    public function onRun($currentTick) {
+    public function onRun(int $currentTick) {
            
         $this->tile->setText($this->signtext[0], $this->signtext[1], $this->signtext[2], $this->signtext[3]);
 

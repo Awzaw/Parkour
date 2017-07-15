@@ -35,7 +35,7 @@ class MessageTask extends PluginTask {
         $this->killbrick = $killbrick;
     }
 
-    public function onRun($tick) {
+    public function onRun(int $tick) {
         $this->plugin = $this->getOwner();
 
         if (!isset($this->plugin->sessions[$this->sender->getName()])) {
