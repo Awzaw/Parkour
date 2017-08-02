@@ -43,8 +43,10 @@ class MessageTask extends PluginTask {
             return;
         }
 
-        $this->sender->removeAllEffects();
-
+        $this->sender->removeAllEffects();     
+        
+        $this->sender->setFlying(false);  
+        
         $blockbelow = $this->sender->getLevel()->getBlock($this->sender->floor()->subtract(0, 1));
 
         if (($this->killbrick !== 0) && ($blockbelow->getID() == $this->killbrick)) {
