@@ -1,8 +1,8 @@
 name: Parkour
-version: 1.5.3
-author: jdcraft
+version: 1.5.4
+author: awzaw
 api: [3.0.0-ALPHA7]
-main: jdcraft\parkour\Main
+main: awzaw\parkour\Main
 
 permissions:
  parkour.*:

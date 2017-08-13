@@ -1,6 +1,6 @@
 <?php
 
-namespace jdcraft\parkour;
+namespace awzaw\parkour;
 
 use pocketmine\scheduler\PluginTask;
 use pocketmine\plugin\Plugin;

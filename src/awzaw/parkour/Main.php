@@ -1,6 +1,6 @@
 <?php
 
-namespace jdcraft\parkour;
+namespace awzaw\parkour;
 
 use pocketmine\event\block\BlockBreakEvent;
 use pocketmine\event\block\SignChangeEvent;
@@ -26,7 +26,7 @@ use pocketmine\block\BlockIds;
 
 class Main extends PluginBase implements Listener {
 
-    const SIGNIDS = [63, 68];
+    const SIGNIDS = [Item::SIGN_POST, Item::WALL_SIGN];
     public $parkour;
     public $sessions;
     private $lang, $tag, $cfg, $basichud;
@@ -220,25 +220,14 @@ class Main extends PluginBase implements Listener {
                 case "start":
 
                     $idamount = explode(':', $event->getLine(3));
-
                     //If no amount given, set to 64
-                    if(empty($idamount[1]) || $idamount[1] === 0) {
-                        $amount = 64;
-                    } else {
-                        $amount = $idamount[1];
-                    }
-
+                        $amount = isset($idamount[1]) ? (int) $idamount[1] : 64;
                     //If no reward given, set to 57
-                    if(empty($idamount[0]) || $idamount[0] === 0) {
-                        $id = 57;
-                    } else {
-                        $id = $idamount[0];
-                    }
-
+                        $id = isset($idamount[0]) ? (int) $idamount[0] :  57;
                     // Check if the string reward is a valid block
                     if(!is_numeric($id)) {
                         $rewardblock = Item::fromString($id);
-                        if(!$rewardblock instanceof Item) {
+                        if(!($rewardblock instanceof Item)) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
                             break;
                         }
@@ -248,29 +237,24 @@ class Main extends PluginBase implements Listener {
                         if($id === 0) {
                             $id = 57;
                         }
-                        $rewardblock = Item::get($id);
+                        $rewardblock = Item::get((int) $id);
 
-                        if(!$rewardblock instanceof Item) {
+                        if(!($rewardblock instanceof Item)) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
                             break;
                         }
-                        $idstring = Item::get($id)->getName();
+                        $idstring = Item::get((int) $id)->getName();
                     }
-
-                    //Check if amount is valid
-                    if(!is_numeric($amount)) {
-                        $amount = 64;
-                    }
-
                     //Check Target Parkout is valid
                     if(trim($event->getLine(2)) === "") {
                         $player->sendMessage($this->getMessage("no-target-parkour"));
                         break;
                     }
 
-                    //Check if there's already START Sign and stop if there is
+                    //Check if there's already a different START Sign with this name, different coords, and stop if there is
                     foreach(array_keys($this->parkour) as $d) {
-                        if($this->parkour[$d]["type"] === 0 && ($this->parkour[$d]["name"] === $parkourname)) {
+                        $issame = $d === $block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName();
+                        if(!$issame && $this->parkour[$d]["type"] === 0 && ($this->parkour[$d]["name"] === $parkourname)) {
                             $player->sendMessage($this->getMessage("start-exists") . " " . $parkourname);
                             break 2;
                         }
@@ -288,7 +272,6 @@ class Main extends PluginBase implements Listener {
                     if(!$finishfound) {
                         $player->sendMessage($this->getMessage("start-created-nofinish"));
                     }
-
                     $this->parkour[$block->getX() . ":" . $block->getY() . ":" . $block->getZ() . ":" . $block->getLevel()->getFolderName()] = [
                         "type" => 0,
                         "reward" => ($id . ":" . $amount),

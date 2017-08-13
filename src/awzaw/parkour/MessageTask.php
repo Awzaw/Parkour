@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace jdcraft\parkour;
+namespace awzaw\parkour;
 
 use pocketmine\scheduler\PluginTask;
 use pocketmine\utils\TextFormat;
