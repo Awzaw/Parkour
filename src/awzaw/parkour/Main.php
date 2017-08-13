@@ -221,12 +221,12 @@ class Main extends PluginBase implements Listener {
 
                     $idamount = explode(':', $event->getLine(3));
                     //If no amount given, set to 64
-                        $amount = isset($idamount[1]) ? (int) $idamount[1] : 64;
+                        $amount = isset($idamount[1]) ? $idamount[1] : 64;
                     //If no reward given, set to 57
-                        $id = isset($idamount[0]) ? (int) $idamount[0] :  57;
+                        $id = isset($idamount[0]) ? $idamount[0] :  57;
                     // Check if the string reward is a valid block
                     if(!is_numeric($id)) {
-                        $rewardblock = Item::fromString($id);
+                        $rewardblock = Item::fromString((string) $id);
                         if(!($rewardblock instanceof Item)) {
                             $player->sendMessage($this->getMessage("reward-invalid"));
                             break;

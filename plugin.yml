@@ -1,5 +1,5 @@
 name: Parkour
-version: 1.5.4
+version: 1.5.5
 author: awzaw
 api: [3.0.0-ALPHA7]
 main: awzaw\parkour\Main
