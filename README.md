@@ -12,7 +12,7 @@ Line2: start
 
 Line3: NAME OF PARKOUR
 
-Line4: ID:AMOUNT (#reward)
+Line4: ID:AMOUNT (or AMOUNT$)
 
 Then make a FINISH sign
 
@@ -24,6 +24,8 @@ Line3: NAME OF PARKOUR
 
 The #reward line at the end of the start sign can be Wood:5 or 17:5 or just Wood or 5 in which case it defaults to 64 items. If the reward line is blank, it will default to 64 Diamonds. If you use block names instead of ID's, please make sure you spell them correctly, and please note that some names and ID's don't work as expected.
 To give 2 diamond swords(276), for example, you must type: Diamond Sword:2, (two words), not 276 or "DiamondSword"... for a diamond block it is "DiamondBlock", however.
+
+For money rewards you must use EconomyAPI and add `1000$` on the reward line, for example.
 
 The last line of the Finish sign is optional, and can be used to say who made the parkour (also displayed when players start a parkour), or a comment.
 If not already playing parkour, clicking a Parkour Finish sign teleports the player to the parkour start sign.
