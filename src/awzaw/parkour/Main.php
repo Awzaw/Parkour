@@ -7,6 +7,7 @@ use pocketmine\event\block\SignChangeEvent;
 use pocketmine\event\player\PlayerInteractEvent;
 use pocketmine\item\Item;
 use pocketmine\item\ItemBlock;
+use pocketmine\item\ItemFactory;
 use pocketmine\level\Position;
 use pocketmine\utils\TextFormat;
 use pocketmine\plugin\PluginBase;
@@ -467,7 +468,7 @@ class Main extends PluginBase implements Listener {
                             }
                         }
                         $idstring = Item::get($id)->getName();
-                        $sender->getInventory()->addItem(new Item($id, 0, $amount));
+                        $sender->getInventory()->addItem(ItemFactory::get($id, 0, $amount));
                     }
 
                     $sender->sendMessage(TextFormat::AQUA . $this->getMessage("parkour-completed") . " " . $parkourname . " for " . $amount . ($idstring === "$" ? "$" : " " . $idstring) . " in " . $timespent);
