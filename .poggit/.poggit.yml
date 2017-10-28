@@ -1,8 +1,0 @@
----
-branches: master
-projects:
-  Parkour:
-    path: ""
-    model: default
-    icon: http://jdcraft.net/img/obstacle250.png
-...
