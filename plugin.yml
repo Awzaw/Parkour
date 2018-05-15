@@ -1,7 +1,7 @@
 name: Parkour
 version: 1.5.6-5
 author: awzaw
-api: [3.0.0-ALPHA8, 3.0.0-ALPHA9, 3.0.0-ALPHA10, 3.0.0-ALPHA11]
+api: [3.0.0-ALPHA8, 3.0.0-ALPHA9, 3.0.0-ALPHA10, 3.0.0-ALPHA11, 3.0.0-ALPHA12]
 main: awzaw\parkour\Main
 
 permissions:
