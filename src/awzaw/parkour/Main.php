@@ -312,7 +312,7 @@ class Main extends PluginBase implements Listener {
                     $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
                     $tile = $block->getLevel()->getTile($v);
                     $task = new SignTask($this, $tile, $signtext);
-                    $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
+                    $this->getScheduler()->scheduleDelayedTask($task, 20);
                     break;
 
                 case ("finish"):
@@ -364,7 +364,7 @@ class Main extends PluginBase implements Listener {
                     $v = new Vector3($block->getX(), $block->getY(), $block->getZ());
                     $tile = $block->getLevel()->getTile($v);
                     $task = new SignTask($this, $tile, $signtext);
-                    $this->getServer()->getScheduler()->scheduleDelayedTask($task, 20);
+                    $this->getScheduler()->scheduleDelayedTask($task, 20);
                     break;
             }
         }
@@ -523,7 +523,7 @@ class Main extends PluginBase implements Listener {
                         $this->purePerms->getUserDataMgr()->setPermission($sender, "-basichud.user");
                     }
 
-                    $taskid = $this->getServer()->getScheduler()->scheduleRepeatingTask($task, 20);
+                    $taskid = $this->getScheduler()->scheduleRepeatingTask($task, 20);
                     $task->setHandler($taskid);
                     $this->sessions[$sender->getName()] = ["parkour" => $parkourplaying, "start" => time(), "killbrick" => $parkour["killbrick"]];
                 } else {

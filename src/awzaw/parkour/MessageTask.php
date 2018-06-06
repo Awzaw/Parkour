@@ -20,14 +20,16 @@
 
 namespace awzaw\parkour;
 
-use pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\Task;
 use pocketmine\utils\TextFormat;
 use pocketmine\level\Position;
 
-class MessageTask extends PluginTask {
+class MessageTask extends Task {
+	private $sender;
+	private $duration;
+	private $killbrick;
 
     public function __construct(Main $plugin, $sender, $duration, $killbrick) {
-        parent::__construct($plugin);
 
         $this->plugin = $plugin;
         $this->sender = $sender;
@@ -36,10 +38,10 @@ class MessageTask extends PluginTask {
     }
 
     public function onRun(int $tick) {
-        $this->plugin = $this->getOwner();
+        $this->plugin = $this->plugin;
 
         if (!isset($this->plugin->sessions[$this->sender->getName()])) {
-            $this->plugin->getServer()->getScheduler()->cancelTask($this->getTaskId());
+            $this->plugin->getScheduler()->cancelTask($this->getTaskId());
             return;
         }
 
@@ -71,7 +73,7 @@ class MessageTask extends PluginTask {
             $this->sender->sendMessage(TextFormat::RED . $this->plugin->getMessage("start-again"));
             $this->sender->sendMessage(TextFormat::BLUE . $this->plugin->getMessage("click-start") . " " . $pkname);
 
-            $this->plugin->getServer()->getScheduler()->cancelTask($this->getTaskId());
+            $this->plugin->getScheduler()->cancelTask($this->getTaskId());
             return;
         }
 

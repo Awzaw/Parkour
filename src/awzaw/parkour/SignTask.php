@@ -2,13 +2,15 @@
 
 namespace awzaw\parkour;
 
-use pocketmine\scheduler\PluginTask;
+use pocketmine\scheduler\Task;
 use pocketmine\plugin\Plugin;
 
-class SignTask extends PluginTask{
+class SignTask extends Task{
+	private $tile;
+	private $signtext;
 
     public function __construct(Plugin $owner, $tile, $signtext) {
-        parent::__construct($owner);
+		$this->plugin = $owner;
         $this->tile = $tile;
         $this->signtext = $signtext;
     }
